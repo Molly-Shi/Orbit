@@ -169,7 +169,7 @@ input,textarea,select{font-family:inherit; cursor:none;}
 .sidebar-bottom{margin-top:auto; display:flex; flex-direction:column; align-items:center; gap:12px;}
 .me-chip{width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:600; font-size:15px; background:linear-gradient(150deg, var(--accent-2), var(--accent)); color:#fff; box-shadow:0 0 0 3px var(--surface-2);}
 body[data-user="Meng"] .me-chip{color:#0B2B40;}
-.logout-link{font-size:10px; color:var(--ink-softer);}
+.logout-link{font-size:10px; color:var(--ink-softer); padding:0;}
 .logout-link:hover{color:var(--ink-soft);}
 
 .main{flex:1; position:relative; overflow:hidden; height:100vh;}
@@ -258,7 +258,7 @@ body[data-user="Meng"] .dark-btn{color:#0B2B40;}
 .mood-box .pname{font-size:11px; color:rgba(244,239,230,.6); margin-bottom:6px;}
 .mood-box .pscore{font-family:'Fraunces',serif; font-size:26px; color:var(--star);}
 .mood-box .pscore.pending{color:rgba(244,239,230,.3); font-size:14px; font-family:'Manrope',sans-serif;}
-.mood-history-link{display:block; text-align:center; margin-top:12px; font-size:11.5px; color:rgba(244,239,230,.5); transition:color .2s;}
+.mood-history-link{display:block; width:100%; padding:0; text-align:center; margin-top:12px; font-size:11.5px; color:rgba(244,239,230,.5); transition:color .2s;}
 .mood-history-link:hover{color:rgba(244,239,230,.85);}
 
 .mood-history-list{max-height:52vh; overflow-y:auto; margin-top:6px;}
@@ -324,7 +324,6 @@ body[data-user="Meng"] .submit-btn{color:#0B2B40;}
 /* rating modal */
 .rating-title{text-align:center; font-family:'Fraunces',serif; font-size:22px; margin-bottom:6px;}
 .rating-sub{text-align:center; font-size:13px; color:var(--ink-softer); margin-bottom:20px;}
-.rating-skip{display:block; text-align:center; margin-top:16px; font-size:12px; color:var(--ink-softer);}
 .rating-dims{display:flex; flex-direction:column; gap:22px; margin:4px 0 8px;}
 .rdim-label{display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:700; margin-bottom:10px; color:var(--ink);}
 .rdim-ic{font-size:16px;}
@@ -567,7 +566,7 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
     </div>
     <div class="sidebar-bottom">
       <div class="me-chip" id="me-chip">R</div>
-      <a class="logout-link" onclick="logout()">Switch</a>
+      <button type="button" class="logout-link" onclick="logout()">Switch</button>
     </div>
   </div>
 
@@ -618,7 +617,7 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
             <div class="mood-box"><div class="pname">Meng</div><div class="pscore pending" id="mood-Meng">—</div></div>
           </div>
           <button class="dark-btn" id="mood-btn" onclick="openRating()">Rate today</button>
-          <a class="mood-history-link" onclick="openMoodHistory()">View history →</a>
+          <button type="button" class="mood-history-link" onclick="openMoodHistory()">View history →</button>
         </div>
       </div>
     </div>
@@ -784,7 +783,6 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
     <div class="rating-sub">Four quick sliders — takes ten seconds</div>
     <div class="rating-dims" id="rating-dims"></div>
     <button class="submit-btn" onclick="submitRating()">Save rating</button>
-    <a class="rating-skip" onclick="closeModal('rating-modal')">Maybe later</a>
   </div>
 </div>
 
@@ -1456,7 +1454,7 @@ function buildRatingScale(){
       <div class="rdim-label"><span class="rdim-ic">${d.ic}</span>${d.label}</div>
       <div class="rdim-slider-row">
         <span class="rdim-pole">${d.lo}</span>
-        <input type="range" min="0" max="5" step="1" value="2.5" class="rdim-range" data-dim="${d.k}">
+        <input type="range" min="0" max="5" step="0.5" value="2.5" class="rdim-range" data-dim="${d.k}">
         <span class="rdim-pole hi">${d.hi}</span>
       </div>
     </div>`).join('');
