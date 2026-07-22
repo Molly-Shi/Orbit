@@ -258,6 +258,22 @@ body[data-user="Meng"] .dark-btn{color:#0B2B40;}
 .mood-box .pname{font-size:11px; color:rgba(244,239,230,.6); margin-bottom:6px;}
 .mood-box .pscore{font-family:'Fraunces',serif; font-size:26px; color:var(--star);}
 .mood-box .pscore.pending{color:rgba(244,239,230,.3); font-size:14px; font-family:'Manrope',sans-serif;}
+.mood-history-link{display:block; text-align:center; margin-top:12px; font-size:11.5px; color:rgba(244,239,230,.5); transition:color .2s;}
+.mood-history-link:hover{color:rgba(244,239,230,.85);}
+
+.mood-history-list{max-height:52vh; overflow-y:auto; margin-top:6px;}
+.hist-row{display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--line); gap:14px;}
+.hist-row:last-child{border-bottom:none;}
+.hist-date{font-size:11.5px; color:var(--ink-softer); width:52px; flex-shrink:0;}
+.hist-people{display:flex; gap:18px; flex:1; justify-content:flex-end;}
+.hist-person{display:flex; align-items:center; gap:6px;}
+.hist-person.empty{opacity:.35;}
+.hist-avatar{width:20px; height:20px; border-radius:50%; flex-shrink:0; font-size:9px; display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:600; color:#fff;}
+.hist-avg{font-family:'Fraunces',serif; font-size:13px; width:22px; color:var(--ink);}
+.hist-avg.pending{color:var(--ink-softer); font-family:'Manrope',sans-serif; font-size:11px; width:auto;}
+.hist-bars{display:flex; gap:2px; align-items:flex-end; height:22px;}
+.hist-bar{position:relative; width:5px; height:100%; border-radius:2px; background:var(--surface-2); overflow:hidden;}
+.hist-bar::after{content:''; position:absolute; left:0; right:0; bottom:0; height:var(--v,0%); background:var(--c,var(--accent)); border-radius:2px;}
 
 /* ================= MODALS ================= */
 .modal-overlay{position:fixed; inset:0; background:rgba(30,25,48,.55); backdrop-filter:blur(4px); z-index:200; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .25s; padding:18px;}
@@ -280,6 +296,14 @@ body[data-user="Meng"] .dark-btn{color:#0B2B40;}
 .comment-input-row input:focus{border-color:var(--accent);}
 .comment-input-row button{width:38px; height:38px; border-radius:50%; background:var(--accent); color:#fff; flex-shrink:0;}
 body[data-user="Meng"] .comment-input-row button{color:#0B2B40;}
+.delete-record-btn{
+  display:none; margin-top:18px; padding:9px 16px; border-radius:100px; font-size:12px; font-weight:600;
+  background:rgba(196,74,74,.08); color:#B23B3B; border:1px solid rgba(196,74,74,.22);
+  align-items:center; gap:7px; transition:all .2s;
+}
+.delete-record-btn.visible{display:inline-flex;}
+.delete-record-btn:hover{background:rgba(196,74,74,.14);}
+.delete-record-btn.armed{background:#C4453F; color:#fff; border-color:#C4453F; box-shadow:0 6px 18px rgba(196,74,74,.35);}
 
 form label{display:block; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-softer); margin-bottom:8px; margin-top:18px;}
 form label:first-of-type{margin-top:0;}
@@ -594,6 +618,7 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
             <div class="mood-box"><div class="pname">Meng</div><div class="pscore pending" id="mood-Meng">—</div></div>
           </div>
           <button class="dark-btn" id="mood-btn" onclick="openRating()">Rate today</button>
+          <a class="mood-history-link" onclick="openMoodHistory()">View history →</a>
         </div>
       </div>
     </div>
@@ -660,6 +685,10 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
     <img id="detail-photo" class="share-photo" style="display:none;">
     <div class="modal-author mono" id="detail-author"></div>
     <div class="modal-text" id="detail-text"></div>
+    <button class="delete-record-btn" id="detail-delete-btn" onclick="armDeleteButton(this, function(){ deleteShareRecord(currentDetailId); })">
+      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="14" height="14"><path d="M4 6h12M8 6V4.5A1.5 1.5 0 0 1 9.5 3h1A1.5 1.5 0 0 1 12 4.5V6M6 6l.6 9.4A1.5 1.5 0 0 0 8.1 17h3.8a1.5 1.5 0 0 0 1.5-1.6L14 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="del-label">Delete</span>
+    </button>
     <div class="comments">
       <div id="detail-comments"></div>
       <div class="comment-input-row">
@@ -740,6 +769,10 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
     <div class="modal-author mono" id="memo-detail-date"></div>
     <h3 class="serif" style="font-size:20px; margin:6px 0 12px;" id="memo-detail-title"></h3>
     <div class="modal-text" id="memo-detail-text"></div>
+    <button class="delete-record-btn" id="memo-detail-delete-btn" onclick="armDeleteButton(this, function(){ deleteMemoryRecord(currentMemoDetailId); })">
+      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="14" height="14"><path d="M4 6h12M8 6V4.5A1.5 1.5 0 0 1 9.5 3h1A1.5 1.5 0 0 1 12 4.5V6M6 6l.6 9.4A1.5 1.5 0 0 0 8.1 17h3.8a1.5 1.5 0 0 0 1.5-1.6L14 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="del-label">Delete</span>
+    </button>
   </div>
 </div>
 
@@ -752,6 +785,16 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
     <div class="rating-dims" id="rating-dims"></div>
     <button class="submit-btn" onclick="submitRating()">Save rating</button>
     <a class="rating-skip" onclick="closeModal('rating-modal')">Maybe later</a>
+  </div>
+</div>
+
+<!-- ============ Mood history modal ============ -->
+<div class="modal-overlay" id="mood-history-modal">
+  <div class="modal-box" style="max-width:460px;">
+    <span class="modal-close" onclick="closeModal('mood-history-modal')">✕</span>
+    <div class="rating-title serif">Mood History</div>
+    <div class="rating-sub">Every day either of you has checked in — nothing is ever overwritten</div>
+    <div id="mood-history-list" class="mood-history-list"></div>
   </div>
 </div>
 
@@ -793,6 +836,10 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
     <h3 class="serif" style="font-size:20px; margin:8px 0 6px;" id="place-detail-name"></h3>
     <div class="modal-author mono" id="place-detail-meta"></div>
     <div class="modal-text" id="place-detail-notes"></div>
+    <button class="delete-record-btn" id="place-detail-delete-btn" onclick="armDeleteButton(this, function(){ deletePlaceRecord(currentPlaceDetailId); })">
+      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="14" height="14"><path d="M4 6h12M8 6V4.5A1.5 1.5 0 0 1 9.5 3h1A1.5 1.5 0 0 1 12 4.5V6M6 6l.6 9.4A1.5 1.5 0 0 0 8.1 17h3.8a1.5 1.5 0 0 0 1.5-1.6L14 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="del-label">Delete</span>
+    </button>
   </div>
 </div>
 
@@ -1241,6 +1288,9 @@ function openDetail(id){
   if(s.photo){ img.src=s.photo; img.style.display='block'; } else { img.style.display='none'; }
   document.getElementById('detail-author').textContent = s.author+' · '+fmtDate(s.createdAt);
   document.getElementById('detail-text').textContent = s.text;
+  const delBtn = document.getElementById('detail-delete-btn');
+  resetDeleteBtn(delBtn);
+  delBtn.classList.toggle('visible', s.author===state.user);
   renderComments(s);
   openModal('detail-modal');
 }
@@ -1406,14 +1456,15 @@ function buildRatingScale(){
       <div class="rdim-label"><span class="rdim-ic">${d.ic}</span>${d.label}</div>
       <div class="rdim-slider-row">
         <span class="rdim-pole">${d.lo}</span>
-        <input type="range" min="0" max="10" value="5" class="rdim-range" data-dim="${d.k}">
+        <input type="range" min="0" max="5" step="1" value="2.5" class="rdim-range" data-dim="${d.k}">
         <span class="rdim-pole hi">${d.hi}</span>
       </div>
     </div>`).join('');
 }
-// A saved rating is an object like {mood:7, energy:5, balance:8, connection:6}.
-// Older data (before this feature existed) may just be a single number —
-// averaging a plain number returns itself, so old entries still display fine.
+// A saved rating is an object like {mood:4, energy:3, balance:5, connection:2}
+// on a 0–5 scale. Older data (before this feature existed, or from the
+// earlier 0–10 version) may be a single number — averaging a plain number
+// returns itself, so old entries still display fine either way.
 function ratingAverage(v){
   if(v===undefined || v===null) return null;
   if(typeof v==='number') return v;
@@ -1426,7 +1477,7 @@ function openRating(){
   const existingObj = (existing && typeof existing==='object') ? existing : {};
   RATING_DIMENSIONS.forEach(d=>{
     const input = document.querySelector(`.rdim-range[data-dim="${d.k}"]`);
-    if(input) input.value = (typeof existingObj[d.k]==='number') ? existingObj[d.k] : 5;
+    if(input) input.value = (typeof existingObj[d.k]==='number') ? existingObj[d.k] : 2.5;
   });
   openModal('rating-modal');
 }
@@ -1435,7 +1486,7 @@ async function submitRating(){
   const result = {};
   RATING_DIMENSIONS.forEach(d=>{
     const input = document.querySelector(`.rdim-range[data-dim="${d.k}"]`);
-    result[d.k] = input ? Number(input.value) : 5;
+    result[d.k] = input ? Number(input.value) : 2.5;
   });
   if(!state.dailyRatings[key]) state.dailyRatings[key]={};
   state.dailyRatings[key][state.user]=result;
@@ -1455,6 +1506,62 @@ function renderMood(){
   const btn = document.getElementById('mood-btn');
   const mine = ratingAverage(rec[state.user]);
   btn.textContent = (mine!==null) ? 'Update rating' : 'Rate today';
+}
+// Every day's rating is stored under its own date key (state.dailyRatings[date]),
+// so nothing ever gets overwritten by a later entry — this view just surfaces
+// the full history rather than only "today", which was already being kept.
+function openMoodHistory(){
+  renderMoodHistoryList();
+  openModal('mood-history-modal');
+}
+function fmtHistDate(d){
+  if(d===todayStr()) return 'Today';
+  const dt = new Date(d+'T00:00:00');
+  return dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+function renderHistPerson(user, val){
+  const avg = ratingAverage(val);
+  const color = userColor(user);
+  if(avg===null){
+    return `<div class="hist-person empty">
+      <span class="hist-avatar" style="background:${color}">${user[0]}</span>
+      <span class="hist-avg pending">—</span>
+    </div>`;
+  }
+  const dims = (val && typeof val==='object') ? val : null;
+  const bars = RATING_DIMENSIONS.map(d=>{
+    const v = dims ? (typeof dims[d.k]==='number' ? dims[d.k] : avg) : avg;
+    const pct = Math.max(6, Math.round((v/5)*100));
+    return `<span class="hist-bar" style="--v:${pct}%; --c:${color};" title="${d.label}: ${v}/5"></span>`;
+  }).join('');
+  return `<div class="hist-person">
+    <span class="hist-avatar" style="background:${color}">${user[0]}</span>
+    <span class="hist-avg">${Math.round(avg*10)/10}</span>
+    <span class="hist-bars">${bars}</span>
+  </div>`;
+}
+function renderMoodHistoryList(){
+  const el = document.getElementById('mood-history-list');
+  const dates = Object.keys(state.dailyRatings)
+    .filter(d=>{
+      const rec = state.dailyRatings[d];
+      return rec && (ratingAverage(rec.Rey)!==null || ratingAverage(rec.Meng)!==null);
+    })
+    .sort((a,b)=>b.localeCompare(a));
+  if(!dates.length){
+    el.innerHTML = '<div class="empty-note">No check-ins yet — rate today to start the record.</div>';
+    return;
+  }
+  el.innerHTML = dates.map(d=>{
+    const rec = state.dailyRatings[d];
+    return `<div class="hist-row">
+      <div class="hist-date mono">${fmtHistDate(d)}</div>
+      <div class="hist-people">
+        ${renderHistPerson('Rey', rec.Rey)}
+        ${renderHistPerson('Meng', rec.Meng)}
+      </div>
+    </div>`;
+  }).join('');
 }
 function maybePromptRating(){
   if(hasPromptedRatingThisSession) return;
@@ -1612,8 +1719,10 @@ function renderPlaces(){
     </div>`).join('');
   el.innerHTML = html;
 }
+let currentPlaceDetailId=null;
 function openPlaceDetail(id){
   const p = state.places.find(x=>x.id===id); if(!p) return;
+  currentPlaceDetailId = id;
   const img = document.getElementById('place-detail-photo');
   if(p.photo){ img.src=p.photo; img.style.display='block'; } else img.style.display='none';
   document.getElementById('place-detail-tag').innerHTML = placeTagIcon(p.tag)+' '+esc(p.tag);
@@ -1621,6 +1730,9 @@ function openPlaceDetail(id){
   document.getElementById('place-detail-name').textContent = p.name;
   document.getElementById('place-detail-meta').textContent = p.author + (p.date ? ' · '+p.date : '');
   document.getElementById('place-detail-notes').textContent = p.notes || '';
+  const delBtn = document.getElementById('place-detail-delete-btn');
+  resetDeleteBtn(delBtn);
+  delBtn.classList.toggle('visible', p.author===state.user);
   openModal('place-detail-modal');
 }
 
@@ -1665,19 +1777,80 @@ async function submitMemory(evt){
   toast('Memory kept ✦');
   return false;
 }
+let currentMemoDetailId=null;
 function openMemoDetail(id){
   const m = state.memories.find(x=>x.id===id); if(!m) return;
+  currentMemoDetailId = id;
   const img = document.getElementById('memo-detail-photo');
   if(m.photo){ img.src=m.photo; img.style.display='block'; } else img.style.display='none';
   document.getElementById('memo-detail-date').textContent = (m.date||'')+' · '+m.author;
   document.getElementById('memo-detail-title').textContent = m.title;
   document.getElementById('memo-detail-text').textContent = m.text;
+  const delBtn = document.getElementById('memo-detail-delete-btn');
+  resetDeleteBtn(delBtn);
+  delBtn.classList.toggle('visible', m.author===state.user);
   openModal('memo-detail-modal');
 }
 
 /* ===================== MODAL HELPERS ===================== */
 function openModal(id){ document.getElementById(id).classList.add('show'); }
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
+/* ===================== DELETE (author-only, tap-twice-to-confirm) ===================== */
+// First tap arms the button (turns solid red, label changes) and starts a
+// short countdown; a second tap within that window actually deletes.
+// Any other armed delete button gets disarmed first, and the countdown
+// resets automatically if the person doesn't confirm — this is the
+// anti-accidental-tap guard.
+function resetDeleteBtn(btn){
+  if(!btn) return;
+  btn.classList.remove('armed');
+  clearTimeout(btn._armTimer);
+  const label = btn.querySelector('.del-label');
+  if(label) label.textContent = 'Delete';
+}
+function armDeleteButton(btn, onConfirm){
+  if(btn.classList.contains('armed')){
+    resetDeleteBtn(btn);
+    onConfirm();
+    return;
+  }
+  document.querySelectorAll('.delete-record-btn.armed').forEach(resetDeleteBtn);
+  btn.classList.add('armed');
+  const label = btn.querySelector('.del-label');
+  if(label) label.textContent = 'Tap again to delete';
+  btn._armTimer = setTimeout(()=>resetDeleteBtn(btn), 3000);
+}
+async function deleteShareRecord(id){
+  const s = state.shares.find(x=>x.id===id);
+  if(!s || s.author!==state.user) return;
+  state.shares = state.shares.filter(x=>x.id!==id);
+  state.sharesIndex = state.sharesIndex.filter(x=>x!==id);
+  closeModal('detail-modal');
+  renderFeed(); renderOrbit(); if(orbitMode==='list') renderOrbitListOverlay(true);
+  await sMultiSet({ ['share:'+id]: null, 'shares-index': JSON.stringify(state.sharesIndex) });
+  toast('Share deleted');
+}
+async function deleteMemoryRecord(id){
+  const m = state.memories.find(x=>x.id===id);
+  if(!m || m.author!==state.user) return;
+  state.memories = state.memories.filter(x=>x.id!==id);
+  state.memoriesIndex = state.memoriesIndex.filter(x=>x!==id);
+  closeModal('memo-detail-modal');
+  renderMemos();
+  await sMultiSet({ ['memory:'+id]: null, 'memories-index': JSON.stringify(state.memoriesIndex) });
+  toast('Memory deleted');
+}
+async function deletePlaceRecord(id){
+  const p = state.places.find(x=>x.id===id);
+  if(!p || p.author!==state.user) return;
+  state.places = state.places.filter(x=>x.id!==id);
+  state.placesIndex = state.placesIndex.filter(x=>x!==id);
+  closeModal('place-detail-modal');
+  renderPlaces();
+  await sMultiSet({ ['place:'+id]: null, 'places-index': JSON.stringify(state.placesIndex) });
+  toast('Place deleted');
+}
 document.querySelectorAll('.modal-overlay').forEach(m=>{
   m.addEventListener('click', e=>{ if(e.target===m) m.classList.remove('show'); });
 });
