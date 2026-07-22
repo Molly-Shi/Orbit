@@ -6,6 +6,8 @@
 <title>Orbit · Rey &amp; Meng</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="firebase-app-compat.js"></script>
+<script src="firebase-database-compat.js"></script>
 <style>
 :root{
   --bg:#FAF6EF;
@@ -19,16 +21,16 @@
   --night-2:#241E38;
   --night-3:#302748;
   --star:#F4EFE6;
-  --accent:#2F4F8F;
-  --accent-2:#5C82C4;
+  --accent:#3B5998;
+  --accent-2:#7C97C9;
   --glow:rgba(47,79,143,.5);
   --radius:20px;
   --radius-sm:12px;
   --shadow-soft:0 8px 30px rgba(51,44,37,0.08);
   --shadow-deep:0 20px 60px rgba(20,15,35,0.35);
 }
-body[data-user="Rey"]{ --accent:#2F4F8F; --accent-2:#5C82C4; --glow:rgba(47,79,143,.55); }
-body[data-user="Meng"]{ --accent:#3FB2EE; --accent-2:#8FDBFF; --glow:rgba(63,178,238,.55); }
+body[data-user="Rey"]{ --accent:#3B5998; --accent-2:#7C97C9; --glow:rgba(59,89,152,.42); }
+body[data-user="Meng"]{ --accent:#6FB8DE; --accent-2:#BFE3F2; --glow:rgba(111,184,222,.4); }
 *{box-sizing:border-box; margin:0; padding:0;}
 html,body{height:100%;}
 body{
@@ -63,17 +65,55 @@ input,textarea,select{font-family:inherit; cursor:none;}
   position:fixed; inset:0; z-index:50;
   display:flex; align-items:center; justify-content:center;
   background:
-    radial-gradient(60% 50% at 20% 15%, rgba(47,79,143,.20), transparent 60%),
-    radial-gradient(55% 45% at 82% 80%, rgba(63,178,238,.18), transparent 60%),
+    radial-gradient(60% 50% at 20% 15%, rgba(59,89,152,.18), transparent 60%),
+    radial-gradient(55% 45% at 82% 80%, rgba(111,184,222,.15), transparent 60%),
     var(--night);
   overflow:hidden; padding:20px;
 }
-#login-screen .stars{position:absolute; inset:0; opacity:.7;}
-.login-card{position:relative; z-index:2; text-align:center; color:var(--star);}
+#login-screen .stars{position:absolute; inset:0; opacity:.8;}
+.login-nebula{
+  position:absolute; width:70vmax; height:70vmax; border-radius:50%; z-index:1;
+  background:radial-gradient(circle, rgba(111,184,222,.14), rgba(59,89,152,.08) 45%, transparent 70%);
+  top:-15vmax; left:-10vmax; filter:blur(10px);
+  animation:nebulaDrift 34s ease-in-out infinite alternate;
+  pointer-events:none;
+}
+@keyframes nebulaDrift{
+  0%{transform:translate(0,0) scale(1);}
+  100%{transform:translate(8vmax,10vmax) scale(1.12);}
+}
+.login-logo{
+  position:absolute; top:26px; left:30px; z-index:3;
+  display:flex; align-items:center; gap:10px;
+  color:rgba(244,239,230,.75);
+}
+.login-logo-mark{width:26px; height:26px; overflow:visible;}
+.login-logo-mark .orbit-ring{animation:logoSpin 14s linear infinite;}
+.login-logo-mark .orbit-ring.rev{animation-direction:reverse; animation-duration:19s;}
+@keyframes logoSpin{from{transform:rotate(0deg);} to{transform:rotate(360deg);}}
+.login-logo-word{font-size:15px; letter-spacing:.03em;}
 .login-eyebrow{font-size:11px; letter-spacing:.34em; text-transform:uppercase; color:rgba(244,239,230,.5); margin-bottom:20px;}
-.login-title{font-size:clamp(34px,6.5vw,58px); font-weight:500; line-height:1.12; margin-bottom:12px;}
-.login-title em{font-style:italic; color:var(--star); background:linear-gradient(90deg,#8FDBFF,#5C82C4); -webkit-background-clip:text; background-clip:text; color:transparent;}
+.login-card{position:relative; z-index:2; text-align:center; color:var(--star);}
+.login-title{font-size:clamp(30px,6.5vw,54px); font-weight:500; line-height:1.16; margin-bottom:14px;}
+.login-title .lt-line{display:block;}
+.login-title em{font-style:italic; background:linear-gradient(90deg,#BFE3F2,#7C97C9); -webkit-background-clip:text; background-clip:text; color:transparent;}
 .login-sub{color:rgba(244,239,230,.55); font-size:14px; margin-bottom:48px;}
+
+/* click-to-enter transition */
+#star-transition{
+  position:fixed; inset:0; z-index:90; opacity:0; pointer-events:none;
+  transition:opacity .35s ease;
+}
+#star-transition.active{opacity:1; pointer-events:all;}
+.st-burst{
+  position:fixed; left:50%; top:50%; width:20px; height:20px; border-radius:50%;
+  background:radial-gradient(circle, #fff 0%, var(--bcolor,#6FB8DE) 45%, var(--bcolor,#6FB8DE) 100%);
+  transform:translate(-50%,-50%) scale(0);
+}
+#star-transition.active .st-burst{
+  animation:burstExpand .68s cubic-bezier(.3,.7,.3,1) forwards;
+}
+@keyframes burstExpand{ to{ transform:translate(-50%,-50%) scale(70); } }
 .identity-row{display:flex; gap:22px; justify-content:center; flex-wrap:wrap;}
 .identity-card{
   width:172px; padding:30px 18px 24px; border-radius:24px;
@@ -81,18 +121,39 @@ input,textarea,select{font-family:inherit; cursor:none;}
   backdrop-filter:blur(6px); transition:transform .45s cubic-bezier(.2,.8,.2,1), border-color .3s;
 }
 .identity-card:hover{transform:translateY(-8px); border-color:rgba(244,239,230,.3);}
-.identity-card[data-id="Rey"] .id-orb{background:radial-gradient(circle at 35% 30%, #5C82C4, #2F4F8F 60%, #1c3564 100%); box-shadow:0 0 40px rgba(47,79,143,.55);}
-.identity-card[data-id="Meng"] .id-orb{background:radial-gradient(circle at 35% 30%, #CFF0FF, #3FB2EE 60%, #1f8fc9 100%); box-shadow:0 0 40px rgba(63,178,238,.55);}
-.id-orb{width:58px; height:58px; border-radius:50%; margin:0 auto 20px; animation:orbfloat 5s ease-in-out infinite;}
-@keyframes orbfloat{0%,100%{transform:translateY(0);} 50%{transform:translateY(-7px);}}
-.identity-name{font-family:'Fraunces',serif; font-size:22px; font-weight:500; margin-bottom:5px;}
-.identity-hint{font-size:11px; color:rgba(244,239,230,.42); letter-spacing:.06em; text-transform:uppercase;}
-.identity-card button{
-  margin-top:18px; width:100%; padding:11px 0; border-radius:100px; font-size:13px; font-weight:600;
-  background:rgba(244,239,230,.08); color:var(--star); border:1px solid rgba(244,239,230,.16); transition:all .3s;
+.id-star{
+  position:relative; width:64px; height:64px; margin:0 auto 14px;
+  animation:starFloat 5.5s ease-in-out infinite;
+  cursor:pointer;
+  transition:transform .25s cubic-bezier(.3,.7,.3,1);
 }
-.identity-card[data-id="Rey"] button:hover{background:#2F4F8F; color:#fff; border-color:#2F4F8F; box-shadow:0 0 26px rgba(47,79,143,.6);}
-.identity-card[data-id="Meng"] button:hover{background:#3FB2EE; color:#0B2B40; border-color:#3FB2EE; box-shadow:0 0 26px rgba(63,178,238,.6);}
+.id-star:hover{transform:scale(1.06);}
+.id-star:active{transform:scale(.94);}
+.id-star svg{position:relative; z-index:2; width:100%; height:100%; overflow:visible;}
+.id-star .star-core{animation:starPulse 3.2s ease-in-out infinite; transform-origin:32px 32px;}
+.id-star .star-glow{animation:starPulse 3.2s ease-in-out infinite .3s; transform-origin:32px 32px;}
+@keyframes starPulse{0%,100%{opacity:.7; transform:scale(1);} 50%{opacity:1; transform:scale(1.08);}}
+@keyframes starFloat{0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);}}
+
+/* dense orbiting dust field, squashed + tilted for a 3D-ish pass-by-the-star feel */
+.star-orbit-field{
+  position:absolute; inset:-12px; z-index:1; pointer-events:none;
+  transform:rotate(-14deg) scaleY(.42);
+}
+.orbit-dot{
+  position:absolute; top:50%; left:50%; width:var(--sz,3px); height:var(--sz,3px);
+  margin:calc(var(--sz,3px) / -2);
+  border-radius:50%;
+  background:radial-gradient(circle, #fff, rgba(255,255,255,0) 72%);
+  animation: orbitSpin var(--dur,7s) linear infinite var(--delay,0s),
+             dotTwinkle 2.4s ease-in-out infinite var(--tw,0s);
+}
+@keyframes orbitSpin{
+  from{ transform:rotate(0deg) translateX(38px) rotate(0deg) scaleY(2.4); }
+  to{ transform:rotate(360deg) translateX(38px) rotate(-360deg) scaleY(2.4); }
+}
+@keyframes dotTwinkle{0%,100%{opacity:.3;} 50%{opacity:1;}}
+.identity-name{font-family:'Fraunces',serif; font-size:22px; font-weight:500; margin-bottom:2px;}
 
 /* ================= APP SHELL ================= */
 #app{display:none; height:100vh; width:100vw; overflow:hidden;}
@@ -104,7 +165,8 @@ input,textarea,select{font-family:inherit; cursor:none;}
 .sidebar .brand{width:36px; height:36px; border-radius:50%; margin-bottom:26px; background:conic-gradient(from 180deg, var(--accent), var(--accent-2), var(--accent)); box-shadow:0 0 0 4px var(--surface-2);}
 .nav-group{display:contents;}
 .nav-btn{width:56px; height:56px; border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:var(--ink-soft); font-size:10px; transition:all .25s;}
-.nav-btn .ic{font-size:19px;}
+.nav-btn .ic{font-size:19px; display:flex; align-items:center; justify-content:center;}
+.nav-btn .ic svg{width:19px; height:19px; display:block; color:inherit;}
 .nav-btn:hover{background:var(--surface-2); color:var(--ink);}
 .nav-btn.active{background:var(--surface-2); color:var(--accent);}
 .sidebar-bottom{margin-top:auto; display:flex; flex-direction:column; align-items:center; gap:12px;}
@@ -123,6 +185,7 @@ body[data-user="Meng"] .me-chip{color:#0B2B40;}
 .date{font-size:12px; color:var(--ink-softer);}
 .live-badge{display:flex; align-items:center; gap:6px; font-size:11px; color:var(--ink-softer);}
 .live-dot{width:7px; height:7px; border-radius:50%; background:#5BC98A; box-shadow:0 0 0 0 rgba(91,201,138,.6); animation:pulseLive 2.2s infinite;}
+.live-dot.offline{background:#D98456; box-shadow:none; animation:none;}
 @keyframes pulseLive{0%{box-shadow:0 0 0 0 rgba(91,201,138,.55);} 70%{box-shadow:0 0 0 7px rgba(91,201,138,0);} 100%{box-shadow:0 0 0 0 rgba(91,201,138,0);}}
 
 /* ================= HOME / ORBIT ================= */
@@ -134,21 +197,32 @@ body[data-user="Meng"] .me-chip{color:#0B2B40;}
              radial-gradient(100% 80% at 80% 90%, rgba(63,178,238,.16), transparent 55%), var(--night);
 }
 .orbit-wrap svg{width:100%; height:100%; display:block;}
+.orbit-tooltip{
+  position:absolute; z-index:20; max-width:210px; padding:11px 13px; border-radius:13px;
+  background:rgba(30,25,48,.96); border:1px solid rgba(244,239,230,.14);
+  color:var(--star); box-shadow:0 12px 32px rgba(0,0,0,.4);
+  opacity:0; pointer-events:none; transform:translateY(4px);
+  transition:opacity .15s ease, transform .15s ease;
+}
+.orbit-tooltip.show{opacity:1; transform:translateY(0);}
+.orbit-tooltip .ot-tag{font-size:11px; color:rgba(244,239,230,.55); margin-bottom:5px;}
+.orbit-tooltip .ot-author{font-family:'IBM Plex Mono',monospace; font-size:10px; color:rgba(244,239,230,.45); margin-bottom:3px;}
+.orbit-tooltip .ot-text{font-size:12.5px; line-height:1.45;}
 .orbit-hint{position:absolute; top:20px; left:26px; color:rgba(244,239,230,.5); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;}
 .orbit-legend{position:absolute; top:20px; right:26px; display:flex; gap:16px; font-size:12px; color:rgba(244,239,230,.7);}
 .orbit-legend span{display:flex; align-items:center; gap:6px;}
 .leg-dot{width:8px; height:8px; border-radius:50%;}
-.fab{position:absolute; bottom:22px; right:24px; width:54px; height:54px; border-radius:50%; background:var(--accent); color:#fff; font-size:24px; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 30px var(--glow); transition:transform .3s;}
+.fab{position:absolute; bottom:22px; right:24px; width:54px; height:54px; border-radius:50%; background:var(--accent); color:#fff; font-size:24px; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 30px var(--glow); transition:transform .3s; z-index:5;}
 body[data-user="Meng"] .fab{color:#0B2B40;}
 .fab:hover{transform:scale(1.08) rotate(90deg);}
-.view-toggle{position:absolute; bottom:24px; left:24px; display:flex; gap:6px; background:rgba(244,239,230,.08); padding:4px; border-radius:100px;}
+.view-toggle{position:absolute; bottom:24px; left:24px; display:flex; gap:6px; background:rgba(244,239,230,.08); padding:4px; border-radius:100px; z-index:5;}
 .view-toggle button{padding:7px 14px; border-radius:100px; font-size:12px; color:rgba(244,239,230,.6);}
 .view-toggle button.active{background:rgba(244,239,230,.92); color:var(--night);}
 .orbit-node{cursor:none;}
 .orbit-node circle.body{transition:r .2s;}
 .orbit-node:hover circle.body{filter:brightness(1.25);}
 
-.row-below{padding:0 44px 60px; display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:20px;}
+.row-below{padding:0 44px 60px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px;}
 @media(max-width:1080px){.row-below{grid-template-columns:1fr 1fr;}}
 @media(max-width:760px){.row-below{grid-template-columns:1fr;}}
 
@@ -169,14 +243,17 @@ body[data-user="Meng"] .fab{color:#0B2B40;}
 .meet-person{flex:1; border-radius:16px; padding:14px; text-align:center; border:1px solid rgba(244,239,230,.14); background:rgba(244,239,230,.04);}
 .meet-person .pname{font-size:11px; color:rgba(244,239,230,.6); margin-bottom:8px;}
 .meet-person .pdot{width:26px; height:26px; border-radius:50%; margin:0 auto; background:rgba(244,239,230,.14); transition:all .3s; display:flex; align-items:center; justify-content:center; font-size:13px;}
+.meet-person .pdot svg{width:14px; height:14px; color:var(--star);}
 .meet-person.confirmed .pdot{background:rgba(143,219,255,.22); box-shadow:0 0 14px rgba(143,219,255,.35);}
-.dark-card .tag-pick button{background:rgba(244,239,230,.08); border-color:rgba(244,239,230,.16); color:rgba(244,239,230,.75); font-size:12px; padding:7px 12px;}
+.dark-card .tag-pick button{background:rgba(244,239,230,.08); border-color:rgba(244,239,230,.16); color:rgba(244,239,230,.75); font-size:12px; padding:7px 12px; display:inline-flex; align-items:center; gap:6px;}
 .dark-card .tag-pick button.sel{background:var(--accent-2); color:#0B2B40; border-color:var(--accent-2);}
+.dark-card .tag-pick button .opt-ic{display:flex; width:14px; height:14px;}
+.dark-card .tag-pick button .opt-ic svg{width:14px; height:14px;}
 .dark-btn{margin-top:18px; width:100%; padding:12px; border-radius:100px; font-size:13px; font-weight:600; background:var(--accent); color:#fff; box-shadow:0 8px 24px var(--glow); transition:transform .2s;}
 body[data-user="Meng"] .dark-btn{color:#0B2B40;}
 .dark-btn:hover{transform:translateY(-2px);}
 .dark-btn.on{background:#8CE0B0; color:#0c3a20; box-shadow:0 8px 24px rgba(140,224,176,.5);}
-.meet-both{margin-top:14px; text-align:center; font-size:12.5px; color:#8FDBFF; opacity:0; transform:translateY(6px); transition:all .4s;}
+.meet-both{margin-top:14px; text-align:center; font-size:12.5px; color:#BFE3F2; opacity:0; transform:translateY(6px); transition:all .4s;}
 .meet-both.show{opacity:1; transform:translateY(0);}
 
 .mood-scores{display:flex; gap:12px; margin-top:16px;}
@@ -222,13 +299,26 @@ body[data-user="Meng"] .submit-btn{color:#0B2B40;}
 .submit-btn:hover{transform:translateY(-2px);}
 
 /* rating modal */
-.rating-scale{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:8px 0 4px;}
-.rate-btn{width:38px; height:38px; border-radius:12px; border:1px solid var(--line); background:var(--surface-2); font-size:13px; font-weight:600; transition:all .2s;}
-.rate-btn.sel{background:var(--accent); color:#fff; border-color:var(--accent); transform:scale(1.08);}
-body[data-user="Meng"] .rate-btn.sel{color:#0B2B40;}
 .rating-title{text-align:center; font-family:'Fraunces',serif; font-size:22px; margin-bottom:6px;}
-.rating-sub{text-align:center; font-size:13px; color:var(--ink-softer); margin-bottom:18px;}
+.rating-sub{text-align:center; font-size:13px; color:var(--ink-softer); margin-bottom:20px;}
 .rating-skip{display:block; text-align:center; margin-top:16px; font-size:12px; color:var(--ink-softer);}
+.rating-dims{display:flex; flex-direction:column; gap:22px; margin:4px 0 8px;}
+.rdim-label{display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:700; margin-bottom:10px; color:var(--ink);}
+.rdim-ic{font-size:16px;}
+.rdim-slider-row{display:flex; align-items:center; gap:12px;}
+.rdim-pole{font-size:11px; color:var(--ink-softer); width:60px; flex-shrink:0;}
+.rdim-pole.hi{text-align:right;}
+.rdim-range{
+  flex:1; -webkit-appearance:none; appearance:none; height:4px; border-radius:4px;
+  background:var(--surface-2); outline:none; cursor:none;
+}
+.rdim-range::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none; width:18px; height:18px; border-radius:50%;
+  background:var(--accent); cursor:none; box-shadow:0 2px 8px rgba(0,0,0,.22); border:2px solid var(--surface);
+}
+.rdim-range::-moz-range-thumb{
+  width:18px; height:18px; border-radius:50%; background:var(--accent); border:2px solid var(--surface); cursor:none;
+}
 
 /* ================= SCHEDULE ================= */
 .mode-switch{display:flex; gap:8px; margin:0 44px 24px; background:var(--surface-2); padding:5px; border-radius:100px; width:fit-content;}
@@ -239,8 +329,8 @@ body[data-user="Meng"] .rate-btn.sel{color:#0B2B40;}
 .person-col{background:var(--surface); border-radius:var(--radius); padding:24px; border:1px solid var(--line); box-shadow:var(--shadow-soft);}
 .person-col-head{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
 .person-col-head .dot{width:12px; height:12px; border-radius:50%;}
-.person-col-head[data-p="Rey"] .dot{background:#2F4F8F;}
-.person-col-head[data-p="Meng"] .dot{background:#3FB2EE;}
+.person-col-head[data-p="Rey"] .dot{background:#3B5998;}
+.person-col-head[data-p="Meng"] .dot{background:#6FB8DE;}
 .person-col-head h4{font-family:'Fraunces',serif; font-weight:500; font-size:16px;}
 .sched-item{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); align-items:center;}
 .sched-item:last-child{border-bottom:none;}
@@ -283,22 +373,8 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
 #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 
 /* ================= PLACES ================= */
-.places-toolbar{margin:0 44px 22px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;}
-.places-toolbar-left{display:flex; align-items:center; gap:10px;}
-.icon-btn{width:38px; height:38px; border-radius:12px; background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-size:15px; color:var(--ink-soft); border:1px solid var(--line); flex-shrink:0;}
-.icon-btn:hover{color:var(--accent); border-color:var(--accent);}
-.icon-btn.active{background:var(--accent); color:#fff; border-color:var(--accent);}
-body[data-user="Meng"] .icon-btn.active{color:#0B2B40;}
+.places-toolbar{margin:0 44px 22px; display:flex; align-items:center; justify-content:flex-end; gap:14px; flex-wrap:wrap;}
 .place-breadcrumb{font-size:11px; color:var(--ink-softer); margin-bottom:2px;}
-.place-detail-links{margin-top:14px;}
-.place-detail-links a{font-size:12px; color:var(--accent); font-weight:600;}
-.key-banner{margin:0 44px 20px; padding:14px 18px; border-radius:16px; background:var(--surface-2); border:1px solid var(--line); font-size:12.5px; color:var(--ink-soft); display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;}
-.key-banner button{padding:8px 16px; border-radius:100px; background:var(--accent); color:#fff; font-size:12px; font-weight:600; flex-shrink:0;}
-body[data-user="Meng"] .key-banner button{color:#0B2B40;}
-#places-map-wrap{margin:0 44px 60px; border-radius:26px; overflow:hidden; height:52vh; min-height:380px; border:1px solid var(--line); box-shadow:var(--shadow-soft); position:relative; display:none;}
-#places-map-wrap.active{display:block;}
-#places-amap{width:100%; height:100%;}
-.map-pin-label{background:var(--surface); border-radius:10px; padding:4px 9px; font-size:11px; font-weight:600; box-shadow:var(--shadow-soft); white-space:nowrap;}
 .places-grid{margin:0 44px 60px; display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:18px;}
 .place-card{background:var(--surface); border-radius:20px; overflow:hidden; border:1px solid var(--line); box-shadow:var(--shadow-soft); transition:transform .3s;}
 .place-card:hover{transform:translateY(-4px);}
@@ -308,30 +384,23 @@ body[data-user="Meng"] .key-banner button{color:#0B2B40;}
 .place-card .pc-avatar{width:22px; height:22px; border-radius:50%; flex-shrink:0; font-size:10px; display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:600; color:#fff;}
 .place-card .pc-loc{font-size:10.5px; color:var(--ink-softer); font-family:'IBM Plex Mono',monospace;}
 .place-card h4{font-family:'Fraunces',serif; font-size:16px; margin-bottom:5px;}
-.place-card .pc-addr{font-size:11.5px; color:var(--ink-soft); margin-bottom:6px;}
 .place-card p{font-size:12.5px; color:var(--ink-soft); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
 .place-add-card{border:1.5px dashed var(--line); border-radius:20px; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:170px; color:var(--ink-softer); font-size:13px; gap:8px;}
 .place-add-card .plus{font-size:24px;}
 .place-add-card:hover{border-color:var(--accent); color:var(--accent);}
 
-/* place search / add modal */
-.place-mode-tabs{display:flex; gap:8px; margin-bottom:16px; background:var(--surface-2); padding:4px; border-radius:100px; width:fit-content;}
-.place-mode-tabs button{padding:8px 16px; border-radius:100px; font-size:12.5px; font-weight:600; color:var(--ink-soft);}
-.place-mode-tabs button.active{background:var(--surface); color:var(--ink); box-shadow:var(--shadow-soft);}
-.place-search-results{max-height:220px; overflow-y:auto; border-radius:12px; margin-top:6px;}
-.place-result-item{padding:11px 12px; border-radius:10px; cursor:pointer; transition:background .15s;}
-.place-result-item:hover{background:var(--surface-2);}
-.place-result-item .prn{font-size:13.5px; font-weight:600;}
-.place-result-item .pra{font-size:11px; color:var(--ink-softer); margin-top:2px;}
-.place-picked-card{margin-top:12px; padding:14px; border-radius:14px; background:var(--surface-2); border:1px solid var(--line);}
-.place-picked-card .ppn{font-family:'Fraunces',serif; font-size:16px; margin-bottom:4px;}
-.place-picked-card .ppa{font-size:12px; color:var(--ink-soft); line-height:1.5;}
-.place-picked-clear{font-size:11px; color:var(--ink-softer); margin-top:8px; display:inline-block;}
-.no-key-note{font-size:12px; color:var(--ink-softer); margin-top:8px; line-height:1.5;}
+/* ================= SETUP NOTICE ================= */
+.setup-card{max-width:520px; text-align:left;}
+.setup-card .login-title{font-size:34px; text-align:center;}
+.setup-card .login-eyebrow{text-align:center;}
+.setup-body{color:rgba(244,239,230,.7); font-size:13.5px; line-height:1.8; margin-top:8px;}
+.setup-body code{background:rgba(244,239,230,.1); padding:2px 7px; border-radius:6px; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:#BFE3F2;}
+.setup-body ol{margin:14px 0 0 20px;}
+.setup-body li{margin-bottom:8px;}
 
 /* ================= RESPONSIVE: TABLET / PHONE ================= */
 @media(max-width:1080px){
-  .topbar, .orbit-wrap, .row-below, .mode-switch, .personal-grid, .shared-todo, .memo-grid, .places-toolbar, .key-banner, #places-map-wrap, .places-grid{margin-left:28px; margin-right:28px;}
+  .topbar, .orbit-wrap, .row-below, .mode-switch, .personal-grid, .shared-todo, .memo-grid, .places-toolbar, .places-grid{margin-left:28px; margin-right:28px;}
   .topbar{padding-left:28px; padding-right:28px;}
 }
 @media(max-width:760px){
@@ -349,12 +418,13 @@ body[data-user="Meng"] .key-banner button{color:#0B2B40;}
   .topbar{padding:22px 20px 12px;}
   .topbar h1{font-size:24px;}
   .orbit-wrap{height:46vh; min-height:330px;}
-  .orbit-wrap, .row-below, .mode-switch, .personal-grid, .shared-todo, .memo-grid, .places-toolbar, .key-banner, #places-map-wrap, .places-grid{margin-left:20px; margin-right:20px;}
+  .orbit-wrap, .row-below, .mode-switch, .personal-grid, .shared-todo, .memo-grid, .places-toolbar, .places-grid{margin-left:20px; margin-right:20px;}
   .topbar{padding-left:20px; padding-right:20px;}
   .row-below{grid-template-columns:1fr;}
 }
 @media(max-width:480px){
-  .login-title{font-size:30px;}
+  .login-logo{top:20px; left:22px;}
+  .login-title{font-size:28px;}
   .identity-row{gap:14px;}
   .identity-card{width:148px; padding:24px 12px 18px;}
   .modal-box{padding:22px; border-radius:20px;}
@@ -368,25 +438,102 @@ body[data-user="Meng"] .key-banner button{color:#0B2B40;}
 <!-- ============ LOGIN ============ -->
 <div id="login-screen">
   <canvas class="stars" id="star-canvas"></canvas>
+  <div class="login-nebula"></div>
+  <div class="login-logo">
+    <svg class="login-logo-mark" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="logoCoreGrad" cx="50%" cy="50%">
+          <stop offset="0%" stop-color="#FFFFFF"/>
+          <stop offset="100%" stop-color="#BFE3F2"/>
+        </radialGradient>
+      </defs>
+      <ellipse class="orbit-ring" cx="14" cy="14" rx="12.5" ry="5.2" stroke="#7C97C9" stroke-width="1" fill="none" transform="rotate(-20 14 14)"/>
+      <ellipse class="orbit-ring rev" cx="14" cy="14" rx="12.5" ry="5.2" stroke="#6FB8DE" stroke-width="1" fill="none" opacity=".85" transform="rotate(20 14 14)"/>
+      <circle cx="14" cy="14" r="2.6" fill="url(#logoCoreGrad)"/>
+    </svg>
+    <span class="login-logo-word serif">Orbit</span>
+  </div>
   <div class="login-card">
-    <div class="login-eyebrow">Orbit</div>
-    <div class="login-title serif">Every memory <em>finds its orbit.</em></div>
-    <div class="login-sub">Choose who's signing in.</div>
+    <div class="login-title serif">
+      <span class="lt-line">Every memory</span>
+      <span class="lt-line">finds its <em>orbit.</em></span>
+    </div>
+    <div class="login-sub">Tap a star to sign in.</div>
     <div class="identity-row">
       <div class="identity-card" data-id="Rey">
-        <div class="id-orb"></div>
+        <div class="id-star" onclick="handleStarClick('Rey')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleStarClick('Rey');}" role="button" tabindex="0" aria-label="Sign in as Rey">
+          <div class="star-orbit-field">
+            <span class="orbit-dot" style="--sz:3px; --delay:0s; --dur:7s; --tw:0s;"></span>
+            <span class="orbit-dot" style="--sz:2px; --delay:-1.2s; --dur:8s; --tw:.3s;"></span>
+            <span class="orbit-dot" style="--sz:3px; --delay:-2.4s; --dur:6.5s; --tw:.6s;"></span>
+            <span class="orbit-dot" style="--sz:2px; --delay:-3.6s; --dur:7.5s; --tw:.9s;"></span>
+            <span class="orbit-dot" style="--sz:4px; --delay:-4.8s; --dur:9s; --tw:1.2s;"></span>
+            <span class="orbit-dot" style="--sz:2px; --delay:-0.6s; --dur:6s; --tw:1.5s;"></span>
+            <span class="orbit-dot" style="--sz:3px; --delay:-1.8s; --dur:8.5s; --tw:1.8s;"></span>
+            <span class="orbit-dot" style="--sz:2px; --delay:-3s; --dur:7s; --tw:2.1s;"></span>
+            <span class="orbit-dot" style="--sz:3px; --delay:-4.2s; --dur:6.8s; --tw:.2s;"></span>
+            <span class="orbit-dot" style="--sz:2px; --delay:-5.4s; --dur:7.8s; --tw:.5s;"></span>
+            <span class="orbit-dot" style="--sz:4px; --delay:-2s; --dur:9.4s; --tw:.8s;"></span>
+            <span class="orbit-dot" style="--sz:2px; --delay:-5s; --dur:6.3s; --tw:1.1s;"></span>
+          </div>
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="reyGlow" cx="50%" cy="50%">
+                <stop offset="0%" stop-color="#7C97C9" stop-opacity=".85"/>
+                <stop offset="100%" stop-color="#7C97C9" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="reyStarFill" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#C3D1EE"/>
+                <stop offset="100%" stop-color="#3B5998"/>
+              </linearGradient>
+            </defs>
+            <circle class="star-glow" cx="32" cy="32" r="30" fill="url(#reyGlow)"/>
+            <path class="star-core" d="M32,5 L38.2,23.5 L57.7,23.7 L42,35.2 L47.9,53.8 L32,42.5 L16.1,53.8 L22,35.2 L6.3,23.7 L25.8,23.5 Z" fill="url(#reyStarFill)"/>
+            <circle cx="32" cy="32" r="3" fill="#fff" opacity=".9"/>
+          </svg>
+        </div>
         <div class="identity-name serif">Rey</div>
-        <div class="identity-hint">Deep Blue</div>
-        <button onclick="login('Rey')">Enter</button>
       </div>
       <div class="identity-card" data-id="Meng">
-        <div class="id-orb"></div>
+        <div class="id-star" onclick="handleStarClick('Meng')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleStarClick('Meng');}" role="button" tabindex="0" aria-label="Sign in as Meng">
+          <div class="star-orbit-field">
+            <span class="orbit-dot" style="--sz:3px; --delay:0s; --dur:7.2s; --tw:.1s;"></span>
+            <span class="orbit-dot" style="--sz:2px; --delay:-1.4s; --dur:8.2s; --tw:.4s;"></span>
+            <span class="orbit-dot" style="--sz:3px; --delay:-2.6s; --dur:6.7s; --tw:.7s;"></span>
+            <span class="orbit-dot" style="--sz:2px; --delay:-3.8s; --dur:7.7s; --tw:1s;"></span>
+            <span class="orbit-dot" style="--sz:4px; --delay:-5s; --dur:9.2s; --tw:1.3s;"></span>
+            <span class="orbit-dot" style="--sz:2px; --delay:-0.8s; --dur:6.2s; --tw:1.6s;"></span>
+            <span class="orbit-dot" style="--sz:3px; --delay:-2s; --dur:8.7s; --tw:1.9s;"></span>
+            <span class="orbit-dot" style="--sz:2px; --delay:-3.2s; --dur:7.2s; --tw:2.2s;"></span>
+            <span class="orbit-dot" style="--sz:3px; --delay:-4.4s; --dur:7s; --tw:.3s;"></span>
+            <span class="orbit-dot" style="--sz:2px; --delay:-5.6s; --dur:8s; --tw:.6s;"></span>
+            <span class="orbit-dot" style="--sz:4px; --delay:-2.2s; --dur:9.6s; --tw:.9s;"></span>
+            <span class="orbit-dot" style="--sz:2px; --delay:-5.2s; --dur:6.5s; --tw:1.2s;"></span>
+          </div>
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="mengGlow" cx="50%" cy="50%">
+                <stop offset="0%" stop-color="#6FB8DE" stop-opacity=".85"/>
+                <stop offset="100%" stop-color="#6FB8DE" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="mengStarFill" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#EAF7FC"/>
+                <stop offset="100%" stop-color="#6FB8DE"/>
+              </linearGradient>
+            </defs>
+            <circle class="star-glow" cx="32" cy="32" r="30" fill="url(#mengGlow)"/>
+            <path class="star-core" d="M32,5 L38.2,23.5 L57.7,23.7 L42,35.2 L47.9,53.8 L32,42.5 L16.1,53.8 L22,35.2 L6.3,23.7 L25.8,23.5 Z" fill="url(#mengStarFill)"/>
+            <circle cx="32" cy="32" r="3" fill="#fff" opacity=".9"/>
+          </svg>
+        </div>
         <div class="identity-name serif">Meng</div>
-        <div class="identity-hint">Sky Blue</div>
-        <button onclick="login('Meng')">Enter</button>
       </div>
     </div>
   </div>
+</div>
+
+<div id="star-transition">
+  <div class="st-burst"></div>
 </div>
 
 <!-- ============ APP ============ -->
@@ -394,10 +541,10 @@ body[data-user="Meng"] .key-banner button{color:#0B2B40;}
   <div class="sidebar">
     <div class="brand"></div>
     <div class="nav-group">
-      <button class="nav-btn active" data-view="home" onclick="switchView('home')"><span class="ic">◐</span><span>Orbit</span></button>
-      <button class="nav-btn" data-view="schedule" onclick="switchView('schedule')"><span class="ic">▤</span><span>Schedule</span></button>
-      <button class="nav-btn" data-view="places" onclick="switchView('places')"><span class="ic">📍</span><span>Places</span></button>
-      <button class="nav-btn" data-view="memos" onclick="switchView('memos')"><span class="ic">✦</span><span>Memos</span></button>
+      <button class="nav-btn active" data-view="home" onclick="switchView('home')"><span class="ic"><svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="10" cy="10" rx="8" ry="4" stroke="currentColor" stroke-width="1.4"/><circle cx="10" cy="10" r="1.9" fill="currentColor"/></svg></span><span>Orbit</span></button>
+      <button class="nav-btn" data-view="schedule" onclick="switchView('schedule')"><span class="ic"><svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4.5" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><line x1="3" y1="8.2" x2="17" y2="8.2" stroke="currentColor" stroke-width="1.4"/><line x1="7" y1="2.6" x2="7" y2="5.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="13" y1="2.6" x2="13" y2="5.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span><span>Schedule</span></button>
+      <button class="nav-btn" data-view="places" onclick="switchView('places')"><span class="ic"><svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 18C10 18 15.5 12.6 15.5 8.5C15.5 5.46 13.04 3 10 3C6.96 3 4.5 5.46 4.5 8.5C4.5 12.6 10 18 10 18Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="10" cy="8.5" r="2" stroke="currentColor" stroke-width="1.4"/></svg></span><span>Places</span></button>
+      <button class="nav-btn" data-view="memos" onclick="switchView('memos')"><span class="ic"><svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 2L11.8 8.2L18 10L11.8 11.8L10 18L8.2 11.8L2 10L8.2 8.2L10 2Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></span><span>Memos</span></button>
     </div>
     <div class="sidebar-bottom">
       <div class="me-chip" id="me-chip">R</div>
@@ -411,17 +558,18 @@ body[data-user="Meng"] .key-banner button{color:#0B2B40;}
       <div class="topbar">
         <h1 class="serif">Your Orbit</h1>
         <div class="topbar-right">
-          <div class="live-badge"><span class="live-dot"></span>Live</div>
+          <div class="live-badge"><span class="live-dot" id="live-dot"></span><span id="live-status-text">Live</span></div>
           <div class="date" id="today-label"></div>
         </div>
       </div>
       <div class="orbit-wrap">
         <div class="orbit-hint">Interleaved orbits</div>
         <div class="orbit-legend">
-          <span><i class="leg-dot" style="background:#2F4F8F"></i>Rey</span>
-          <span><i class="leg-dot" style="background:#3FB2EE"></i>Meng</span>
+          <span><i class="leg-dot" style="background:#3B5998"></i>Rey</span>
+          <span><i class="leg-dot" style="background:#6FB8DE"></i>Meng</span>
         </div>
         <svg id="orbit-svg" viewBox="0 0 900 520" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="orbit-tooltip" id="orbit-tooltip"></div>
         <div class="view-toggle">
           <button class="active" id="btn-orbit-view" onclick="setOrbitDisplay('orbit')">Orbit</button>
           <button id="btn-list-view" onclick="setOrbitDisplay('list')">List</button>
@@ -440,7 +588,7 @@ body[data-user="Meng"] .key-banner button{color:#0B2B40;}
             <div class="meet-person" id="meet-Rey"><div class="pname">Rey</div><div class="pdot" id="meet-Rey-ic"></div></div>
             <div class="meet-person" id="meet-Meng"><div class="pname">Meng</div><div class="pdot" id="meet-Meng-ic"></div></div>
           </div>
-          <div class="tag-pick" id="meet-options" style="margin-top:14px; justify-content:center;"></div>
+          <div class="tag-pick" id="meet-options" style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:8px;"></div>
           <div class="meet-both" id="meet-both-msg"></div>
         </div>
         <div class="card dark-card">
@@ -492,19 +640,9 @@ body[data-user="Meng"] .key-banner button{color:#0B2B40;}
         <h1 class="serif">Places</h1>
         <div class="date">Everywhere you've been, together</div>
       </div>
-      <div class="key-banner" id="key-banner">
-        <span>Add an Amap (高德地图) API key for province/city/district/street-level search on the map — or just add places manually anytime.</span>
-        <button onclick="openAmapKeyModal()">Set up map search</button>
-      </div>
       <div class="places-toolbar">
-        <div class="places-toolbar-left">
-          <button class="icon-btn active" id="btn-places-list-view" onclick="setPlacesDisplay('list')" title="List view">▤</button>
-          <button class="icon-btn" id="btn-places-map-view" onclick="setPlacesDisplay('map')" title="Map view">📍</button>
-          <button class="icon-btn" onclick="openAmapKeyModal()" title="Map settings">⚙</button>
-        </div>
         <button class="fab" style="position:static; width:44px; height:44px; font-size:20px;" onclick="openPlaceAdd()" title="Mark a place">＋</button>
       </div>
-      <div id="places-map-wrap"><div id="places-amap"></div></div>
       <div class="places-grid" id="places-grid"></div>
     </div>
 
@@ -612,11 +750,11 @@ body[data-user="Meng"] .key-banner button{color:#0B2B40;}
 
 <!-- ============ Daily rating modal ============ -->
 <div class="modal-overlay" id="rating-modal">
-  <div class="modal-box" style="max-width:400px;">
+  <div class="modal-box" style="max-width:420px;">
     <span class="modal-close" onclick="closeModal('rating-modal')">✕</span>
     <div class="rating-title serif">How was today?</div>
-    <div class="rating-sub">Rate today from 0 (rough) to 10 (wonderful)</div>
-    <div class="rating-scale" id="rating-scale"></div>
+    <div class="rating-sub">Four quick sliders — takes ten seconds</div>
+    <div class="rating-dims" id="rating-dims"></div>
     <button class="submit-btn" onclick="submitRating()">Save rating</button>
     <a class="rating-skip" onclick="closeModal('rating-modal')">Maybe later</a>
   </div>
@@ -627,32 +765,11 @@ body[data-user="Meng"] .key-banner button{color:#0B2B40;}
   <div class="modal-box">
     <span class="modal-close" onclick="closeModal('place-modal')">✕</span>
     <h3 class="serif" style="font-size:20px; margin-bottom:14px;">Mark a place</h3>
-    <div class="place-mode-tabs">
-      <button type="button" class="active" id="btn-place-mode-search" onclick="setPlaceMode('search')">Search map</button>
-      <button type="button" id="btn-place-mode-manual" onclick="setPlaceMode('manual')">Enter manually</button>
-    </div>
     <form onsubmit="return submitPlace(event)">
-      <div id="place-search-block">
-        <label>Search (Amap · 高德地图)</label>
-        <input type="text" id="place-search-input" class="field-input" placeholder="Search a shop, street, city…" oninput="onPlaceSearchInput()" autocomplete="off">
-        <div class="place-search-results" id="place-search-results"></div>
-        <div id="place-picked-summary"></div>
-        <div class="no-key-note" id="place-search-note">Coverage is strongest within China. For places elsewhere, switch to manual entry.</div>
-      </div>
-      <div id="place-manual-block" style="display:none;">
-        <label>Place name</label>
-        <input type="text" id="place-name" class="field-input" placeholder="Shop, restaurant, spot…">
-        <label>Country</label>
-        <input type="text" id="place-country" class="field-input" placeholder="e.g. China, Japan, France…">
-        <label>Province / State</label>
-        <input type="text" id="place-province" class="field-input" placeholder="e.g. Zhejiang, California…">
-        <label>City</label>
-        <input type="text" id="place-city" class="field-input" placeholder="e.g. Hangzhou, Kyoto…">
-        <label>District</label>
-        <input type="text" id="place-district" class="field-input" placeholder="e.g. Xihu District…">
-        <label>Street / Address</label>
-        <input type="text" id="place-street" class="field-input" placeholder="Street name, number…">
-      </div>
+      <label>Place name</label>
+      <input type="text" id="place-name" class="field-input" placeholder="Shop, restaurant, spot…" required>
+      <label>Location (optional)</label>
+      <input type="text" id="place-city" class="field-input" placeholder="City, neighborhood, country…">
       <label>Visit type</label>
       <div class="tag-pick" id="place-tag-pick"></div>
       <input type="text" id="place-custom-tag" class="field-input" placeholder="Or type a custom type…" style="margin-top:10px;">
@@ -671,20 +788,6 @@ body[data-user="Meng"] .key-banner button{color:#0B2B40;}
   </div>
 </div>
 
-<!-- ============ Amap key settings modal ============ -->
-<div class="modal-overlay" id="amap-key-modal">
-  <div class="modal-box" style="max-width:400px;">
-    <span class="modal-close" onclick="closeModal('amap-key-modal')">✕</span>
-    <h3 class="serif" style="font-size:20px; margin-bottom:10px;">Map search setup</h3>
-    <p style="font-size:12.5px; color:var(--ink-soft); line-height:1.65; margin-bottom:18px;">
-      To search places down to street and shop level on a live map, add a free Amap (高德地图) Web JS API key — get one at <a href="https://lbs.amap.com" target="_blank" rel="noopener" style="color:var(--accent); font-weight:600;">lbs.amap.com</a>. Its coverage is strongest within China. For places elsewhere, manual entry works just as well and needs no key.
-    </p>
-    <label>Amap Web JS API key</label>
-    <input type="text" id="amap-key-input" class="field-input" placeholder="Paste your key here…">
-    <button type="button" class="submit-btn" onclick="saveAmapKey()">Save key</button>
-  </div>
-</div>
-
 <!-- ============ Place detail modal ============ -->
 <div class="modal-overlay" id="place-detail-modal">
   <div class="modal-box">
@@ -695,17 +798,67 @@ body[data-user="Meng"] .key-banner button{color:#0B2B40;}
     <h3 class="serif" style="font-size:20px; margin:8px 0 6px;" id="place-detail-name"></h3>
     <div class="modal-author mono" id="place-detail-meta"></div>
     <div class="modal-text" id="place-detail-notes"></div>
-    <div class="place-detail-links" id="place-detail-links"></div>
   </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
+/* ===================== FIREBASE SETUP =====================
+   1. Go to https://console.firebase.google.com and create a free project.
+   2. Build → Realtime Database → Create Database (start in test mode, then
+      lock it down — see the README for recommended security rules).
+   3. Project settings (gear icon) → General → scroll to "Your apps" →
+      add a Web app → copy the config object it gives you → paste the
+      values below, replacing every "YOUR_..." placeholder.
+   4. Save this file and re-deploy (e.g. push to GitHub Pages). Both Rey
+      and Meng open the SAME deployed URL — that's what makes them share data.
+================================================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyABhGgnd4MRTm681ZwS9235afq-yO0MVTs",
+  authDomain: "orbit-01234.firebaseapp.com",
+  databaseURL: "https://orbit-01234-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "orbit-01234",
+  storageBucket: "orbit-01234.firebasestorage.app",
+  messagingSenderId: "761903823283",
+  appId: "1:761903823283:web:423eb6651843a76a49b3c6"
+};
+const FIREBASE_CONFIGURED = firebaseConfig.apiKey && firebaseConfig.apiKey !== 'YOUR_API_KEY';
+let fbDb = null, fbReady = false;
+function initFirebase(){
+  if(!FIREBASE_CONFIGURED || fbReady) return fbReady;
+  try{
+    firebase.initializeApp(firebaseConfig);
+    fbDb = firebase.database();
+    fbReady = true;
+  }catch(e){
+    console.error('Firebase init failed', e);
+    fbReady = false;
+  }
+  return fbReady;
+}
+if(!FIREBASE_CONFIGURED){
+  document.getElementById('login-screen').innerHTML = `
+    <canvas class="stars" id="star-canvas"></canvas>
+    <div class="login-card setup-card">
+      <div class="login-eyebrow">Setup needed</div>
+      <div class="login-title serif">Almost there.</div>
+      <div class="setup-body">
+        This page needs to be connected to a Firebase project before Rey and Meng can sync.
+        <ol>
+          <li>Create a free project at <code>console.firebase.google.com</code> and turn on Realtime Database.</li>
+          <li>In Project settings → General → Your apps, add a Web app and copy its config.</li>
+          <li>Open this file, find <code>const firebaseConfig</code> near the top of the script, and paste your values in — replacing every <code>YOUR_...</code> placeholder.</li>
+          <li>Save, re-deploy (e.g. push to GitHub Pages), and refresh this page.</li>
+        </ol>
+      </div>
+    </div>`;
+}
+
 /* ===================== CONFIG ===================== */
 const TAGS = [
   {k:'Reading', ic:'📖'}, {k:'Food', ic:'🍜'}, {k:'Inspiration', ic:'💡'},
-  {k:'Mood', ic:'💗'}, {k:'Travel', ic:'✈️'}, {k:'Film', ic:'🎬'}, {k:'Music', ic:'🎵'}
+  {k:'Mood', ic:'💗'}, {k:'Travel', ic:'✈️'}, {k:'Film', ic:'🎬'}, {k:'Music', ic:'🎵'}, {k:'Work', ic:'💼'}
 ];
 const TAG_ICON = Object.fromEntries(TAGS.map(t=>[t.k,t.ic]));
 function tagIcon(t){ return TAG_ICON[t] || '🔖'; }
@@ -719,7 +872,7 @@ function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(
 function esc(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function fmtDate(ts){ const d=new Date(ts); return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-const COLOR_REY='#2F4F8F', COLOR_MENG='#3FB2EE';
+const COLOR_REY='#3B5998', COLOR_MENG='#6FB8DE';
 function userColor(u){ return u==='Meng' ? COLOR_MENG : COLOR_REY; }
 
 /* ===================== STATE ===================== */
@@ -731,32 +884,33 @@ let state = {
   scheduleRey:[], scheduleMeng:[],
   meetNights:{},
   dailyRatings:{},
-  places:[], placesIndex:[],
-  amapKey:''
+  places:[], placesIndex:[]
 };
 let orbitRotationRey=0, orbitRotationMeng=0.9;
 let orbitMode='orbit';
 let scheduleMode='personal';
 let selectedTag=null;
 let pendingPhoto=null, pendingMemoPhoto=null, pendingPlacePhoto=null;
-let selectedRatingValue=null;
 let hasPromptedRatingThisSession=false;
-let pollTimer=null;
-let placeMode='search';
 let selectedPlaceTag=null;
-let pickedAmapPlace=null;
-let amapPlaceSearchInstance=null;
-let placesMapInstance=null, placesMarkers=[];
-let placeSearchDebounce=null;
 
-/* ===================== STORAGE HELPERS ===================== */
-async function sGet(key){
-  try{ const r = await window.storage.get(key, true); return r ? r.value : null; }
-  catch(e){ return null; }
-}
+/* ===================== STORAGE HELPERS (Firebase) ===================== */
 async function sSet(key,val){
-  try{ return await window.storage.set(key,val,true); }
-  catch(e){ toast('Sync failed — check your connection'); return null; }
+  if(!fbReady){ toast('Not connected — check your setup'); return null; }
+  try{
+    await fbDb.ref(key).set(val);
+    return {key,value:val};
+  }catch(e){ toast('Sync failed — check your connection'); return null; }
+}
+// Writes several keys at once, atomically — used whenever we write an item
+// together with the index that references it, so a listener can never catch
+// the data half-written (this was the cause of new entries vanishing).
+async function sMultiSet(updates){
+  if(!fbReady){ toast('Not connected — check your setup'); return null; }
+  try{
+    await fbDb.ref().update(updates);
+    return true;
+  }catch(e){ toast('Sync failed — check your connection'); return null; }
 }
 function toast(msg){
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
@@ -766,9 +920,30 @@ function toast(msg){
 function anyModalOpen(){ return !!document.querySelector('.modal-overlay.show'); }
 
 /* ===================== LOGIN ===================== */
+let starTransitioning = false;
+function handleStarClick(user){
+  if(starTransitioning) return;
+  starTransitioning = true;
+  const starEl = document.querySelector(`.identity-card[data-id="${user}"] .id-star`);
+  const rect = starEl.getBoundingClientRect();
+  const overlay = document.getElementById('star-transition');
+  const burst = overlay.querySelector('.st-burst');
+  burst.style.left = (rect.left + rect.width/2) + 'px';
+  burst.style.top = (rect.top + rect.height/2) + 'px';
+  burst.style.setProperty('--bcolor', user==='Meng' ? '#6FB8DE' : '#3B5998');
+  overlay.classList.add('active');
+  setTimeout(()=>{ login(user); }, 560);
+  setTimeout(()=>{
+    overlay.classList.remove('active');
+    starTransitioning = false;
+  }, 780);
+}
 function login(user){
+  if(!FIREBASE_CONFIGURED){ toast('This page isn\'t connected to a database yet — see the setup notice'); return; }
+  if(!initFirebase()){ toast('Could not connect — check your Firebase setup'); return; }
   state.user = user;
   document.body.setAttribute('data-user', user);
+  setCursorTheme(user);
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').classList.add('active');
   document.getElementById('me-chip').textContent = user[0];
@@ -782,13 +957,13 @@ function login(user){
   buildPlaceTagPicker();
   loadAll().then(()=>{
     renderAll();
-    updateKeyBanner();
     maybePromptRating();
-    startPolling();
+    startRealtimeSync();
+    watchConnectionStatus();
   });
 }
 function logout(){
-  stopPolling();
+  stopRealtimeSync();
   document.body.removeAttribute('data-user');
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('app').classList.remove('active');
@@ -800,71 +975,98 @@ function renderAll(){
 }
 
 /* ===================== LOAD DATA ===================== */
-async function loadAll(){
-  try{ const idx = await sGet('shares-index'); state.sharesIndex = idx ? JSON.parse(idx) : []; }
-  catch(e){ state.sharesIndex=[]; }
-  const newShares=[];
-  for(const id of state.sharesIndex){
-    const raw = await sGet('share:'+id);
+// Parses one full snapshot of the database into app state. Used for both the
+// initial load and every realtime update — reading the whole tree in a
+// single round trip instead of many sequential per-key reads, which is both
+// faster and immune to the read-before-write races that caused new entries
+// to disappear.
+function applyRootData(data){
+  data = data || {};
+
+  let sharesIndex = [];
+  try{ sharesIndex = data['shares-index'] ? JSON.parse(data['shares-index']) : []; }catch(e){}
+  const newShares = [];
+  for(const id of sharesIndex){
+    const raw = data['share:'+id];
     if(raw){ try{ newShares.push(JSON.parse(raw)); }catch(e){} }
   }
   newShares.sort((a,b)=>b.createdAt-a.createdAt);
   state.shares = newShares;
+  state.sharesIndex = sharesIndex;
 
-  try{ const idx = await sGet('memories-index'); state.memoriesIndex = idx ? JSON.parse(idx) : []; }
-  catch(e){ state.memoriesIndex=[]; }
-  const newMemories=[];
-  for(const id of state.memoriesIndex){
-    const raw = await sGet('memory:'+id);
+  let memoriesIndex = [];
+  try{ memoriesIndex = data['memories-index'] ? JSON.parse(data['memories-index']) : []; }catch(e){}
+  const newMemories = [];
+  for(const id of memoriesIndex){
+    const raw = data['memory:'+id];
     if(raw){ try{ newMemories.push(JSON.parse(raw)); }catch(e){} }
   }
   newMemories.sort((a,b)=>(b.date||'').localeCompare(a.date||'') || b.createdAt-a.createdAt);
   state.memories = newMemories;
+  state.memoriesIndex = memoriesIndex;
 
-  const rawTodos = await sGet('todos');
-  state.todos = rawTodos ? JSON.parse(rawTodos) : [];
+  try{ state.todos = data['todos'] ? JSON.parse(data['todos']) : []; }catch(e){ state.todos=[]; }
+  try{ state.scheduleRey = data['schedule:Rey'] ? JSON.parse(data['schedule:Rey']) : []; }catch(e){ state.scheduleRey=[]; }
+  try{ state.scheduleMeng = data['schedule:Meng'] ? JSON.parse(data['schedule:Meng']) : []; }catch(e){ state.scheduleMeng=[]; }
+  try{ state.meetNights = data['meet-nights'] ? JSON.parse(data['meet-nights']) : {}; }catch(e){ state.meetNights={}; }
+  try{ state.dailyRatings = data['daily-ratings'] ? JSON.parse(data['daily-ratings']) : {}; }catch(e){ state.dailyRatings={}; }
 
-  const rr = await sGet('schedule:Rey'); state.scheduleRey = rr ? JSON.parse(rr) : [];
-  const rm = await sGet('schedule:Meng'); state.scheduleMeng = rm ? JSON.parse(rm) : [];
-
-  const mn = await sGet('meet-nights'); state.meetNights = mn ? JSON.parse(mn) : {};
-  const dr = await sGet('daily-ratings'); state.dailyRatings = dr ? JSON.parse(dr) : {};
-
-  try{ const idx = await sGet('places-index'); state.placesIndex = idx ? JSON.parse(idx) : []; }
-  catch(e){ state.placesIndex=[]; }
-  const newPlaces=[];
-  for(const id of state.placesIndex){
-    const raw = await sGet('place:'+id);
+  let placesIndex = [];
+  try{ placesIndex = data['places-index'] ? JSON.parse(data['places-index']) : []; }catch(e){}
+  const newPlaces = [];
+  for(const id of placesIndex){
+    const raw = data['place:'+id];
     if(raw){ try{ newPlaces.push(JSON.parse(raw)); }catch(e){} }
   }
   newPlaces.sort((a,b)=>b.createdAt-a.createdAt);
   state.places = newPlaces;
-
-  const ak = await sGet('amap-key'); state.amapKey = ak || '';
+  state.placesIndex = placesIndex;
+}
+async function loadAll(){
+  if(!fbReady) return;
+  try{
+    const snap = await fbDb.ref().once('value');
+    applyRootData(snap.val());
+  }catch(e){
+    toast('Could not load data — check your connection');
+  }
 }
 
-/* ===================== REAL-TIME SYNC (polling) ===================== */
-function startPolling(){
-  stopPolling();
-  pollTimer = setInterval(async ()=>{
-    if(anyModalOpen() || document.hidden) return;
-    await loadAll();
+/* ===================== REAL-TIME SYNC (Firebase) ===================== */
+let fbRootListener = null;
+function startRealtimeSync(){
+  stopRealtimeSync();
+  if(!fbReady) return;
+  fbRootListener = fbDb.ref();
+  fbRootListener.on('value', (snap)=>{
+    if(anyModalOpen()) return;
+    applyRootData(snap.val());
     renderAll();
-    updateKeyBanner();
-  }, 6000);
+  });
   document.addEventListener('visibilitychange', onVisible);
   window.addEventListener('focus', onVisible);
 }
-function stopPolling(){
-  if(pollTimer) clearInterval(pollTimer);
+function stopRealtimeSync(){
+  if(fbRootListener) fbRootListener.off();
+  fbRootListener = null;
+  if(fbDb) fbDb.ref('.info/connected').off();
   document.removeEventListener('visibilitychange', onVisible);
   window.removeEventListener('focus', onVisible);
+}
+function watchConnectionStatus(){
+  if(!fbReady) return;
+  fbDb.ref('.info/connected').on('value', snap=>{
+    const connected = snap.val()===true;
+    const dot = document.getElementById('live-dot');
+    const txt = document.getElementById('live-status-text');
+    if(dot) dot.classList.toggle('offline', !connected);
+    if(txt) txt.textContent = connected ? 'Live' : 'Reconnecting…';
+  });
 }
 async function onVisible(){
   if(document.hidden || !state.user) return;
   await loadAll();
   renderAll();
-  updateKeyBanner();
   maybePromptRating();
 }
 
@@ -885,8 +1087,8 @@ function renderOrbit(){
   defs.innerHTML = `
     <radialGradient id="sunGrad" cx="35%" cy="30%">
       <stop offset="0%" stop-color="#EAF6FF"/>
-      <stop offset="55%" stop-color="#3FB2EE"/>
-      <stop offset="100%" stop-color="#2F4F8F"/>
+      <stop offset="55%" stop-color="#6FB8DE"/>
+      <stop offset="100%" stop-color="#3B5998"/>
     </radialGradient>`;
   svg.appendChild(defs);
   const sun = document.createElementNS(NS,'circle');
@@ -925,6 +1127,7 @@ function drawOrbitFor(user, rx, ry, rotDeg, cx, cy, rotation, color){
     const node = document.createElementNS(NS,'g');
     node.setAttribute('class','orbit-node');
     node.setAttribute('transform',`translate(${x},${y})`);
+    node.setAttribute('data-share-id', s.id);
     node.onclick = ()=>openDetail(s.id);
     const glow = document.createElementNS(NS,'circle');
     glow.setAttribute('r','15'); glow.setAttribute('fill',color); glow.setAttribute('opacity','0.22');
@@ -941,6 +1144,48 @@ function drawOrbitFor(user, rx, ry, rotDeg, cx, cy, rotation, color){
     svg.appendChild(node);
   });
 }
+// Desktop only: hover a node on the orbit to see a quick preview without
+// clicking. Uses event delegation on the persistent <svg> element rather
+// than per-node listeners, since the orbit rebuilds its nodes every
+// animation frame while rotating — per-node hover listeners would lose
+// their target constantly and flicker.
+const hoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+function showOrbitTooltip(s, evt){
+  const tip = document.getElementById('orbit-tooltip');
+  tip.innerHTML = `
+    <div class="ot-tag">${tagIcon(s.tag)} ${esc(s.tag)}</div>
+    <div class="ot-author">${s.author} · ${fmtDate(s.createdAt)}</div>
+    <div class="ot-text">${esc(s.text).slice(0,90)}${s.text.length>90?'…':''}</div>`;
+  tip.classList.add('show');
+  positionOrbitTooltip(evt);
+}
+function positionOrbitTooltip(evt){
+  const tip = document.getElementById('orbit-tooltip');
+  const wrap = document.querySelector('.orbit-wrap');
+  const rect = wrap.getBoundingClientRect();
+  let x = evt.clientX - rect.left + 18;
+  let y = evt.clientY - rect.top + 18;
+  x = Math.min(x, rect.width - 220);
+  y = Math.min(y, rect.height - 90);
+  tip.style.left = Math.max(8,x) + 'px';
+  tip.style.top = Math.max(8,y) + 'px';
+}
+function hideOrbitTooltip(){
+  document.getElementById('orbit-tooltip').classList.remove('show');
+}
+if(hoverCapable){
+  const orbitSvgEl = document.getElementById('orbit-svg');
+  orbitSvgEl.addEventListener('mousemove', (e)=>{
+    const nodeEl = e.target.closest('.orbit-node');
+    if(nodeEl){
+      const id = nodeEl.getAttribute('data-share-id');
+      const s = state.shares.find(x=>x.id===id);
+      if(s){ showOrbitTooltip(s, e); return; }
+    }
+    hideOrbitTooltip();
+  });
+  orbitSvgEl.addEventListener('mouseleave', hideOrbitTooltip);
+}
 function animateOrbits(){
   orbitRotationRey += 0.0016;
   orbitRotationMeng -= 0.0012;
@@ -954,7 +1199,7 @@ function setOrbitDisplay(mode){
   document.getElementById('btn-orbit-view').classList.toggle('active', mode==='orbit');
   document.getElementById('btn-list-view').classList.toggle('active', mode==='list');
   const svg = document.getElementById('orbit-svg');
-  if(mode==='list'){ svg.style.display='none'; renderOrbitListOverlay(true); }
+  if(mode==='list'){ svg.style.display='none'; renderOrbitListOverlay(true); hideOrbitTooltip(); }
   else{ svg.style.display='block'; renderOrbitListOverlay(false); }
 }
 function renderOrbitListOverlay(show){
@@ -963,7 +1208,7 @@ function renderOrbitListOverlay(show){
   if(!el){
     el = document.createElement('div');
     el.id='orbit-list-overlay';
-    el.style.cssText='position:absolute; inset:0; overflow-y:auto; padding:64px 26px 70px; display:flex; flex-direction:column; gap:10px;';
+    el.style.cssText='position:absolute; inset:0; overflow-y:auto; padding:64px 26px 70px; display:flex; flex-direction:column; gap:10px; z-index:1;';
     wrap.appendChild(el);
   }
   el.style.display = show ? 'flex' : 'none';
@@ -1085,8 +1330,10 @@ async function submitShare(evt){
   state.sharesIndex.push(obj.id);
   closeModal('compose-modal');
   renderFeed(); renderOrbit(); if(orbitMode==='list') renderOrbitListOverlay(true);
-  await sSet('share:'+obj.id, JSON.stringify(obj));
-  await sSet('shares-index', JSON.stringify(state.sharesIndex));
+  await sMultiSet({
+    ['share:'+obj.id]: JSON.stringify(obj),
+    'shares-index': JSON.stringify(state.sharesIndex)
+  });
   toast('Shared to orbit ✦');
   return false;
 }
@@ -1094,15 +1341,15 @@ async function submitShare(evt){
 /* ===================== MEET TONIGHT ===================== */
 /* ===================== TONIGHT'S PLAN ===================== */
 const MEET_OPTIONS = [
-  {k:'call', ic:'📞', label:'Phone call'},
-  {k:'video', ic:'🎥', label:'Video call'},
-  {k:'meet', ic:'🤝', label:'Meet in person'},
-  {k:'solo', ic:'🌙', label:'Solo time'}
+  {k:'call', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.6 4.2 8 7.4 6.2 9c.9 2 2.5 3.6 4.5 4.5l1.6-1.8 3.2 1.4v2.4c0 .9-.8 1.6-1.7 1.5-5.5-.6-9.9-5-10.5-10.5-.1-.9.6-1.7 1.5-1.7h2.8Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>', label:'Phone call'},
+  {k:'video', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2.5" y="6" width="10" height="8" rx="1.6" stroke="currentColor" stroke-width="1.3"/><path d="M12.5 8.6 17 6.4v7.2l-4.5-2.2" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>', label:'Video call'},
+  {k:'meet', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="7.7" cy="10" r="5" stroke="currentColor" stroke-width="1.3"/><circle cx="12.3" cy="10" r="5" stroke="currentColor" stroke-width="1.3"/></svg>', label:'Meet in person'},
+  {k:'solo', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.5 3.5a7 7 0 1 0 3 10.9A8.5 8.5 0 0 1 13.5 3.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>', label:'Solo time'}
 ];
 const MEET_ICON = Object.fromEntries(MEET_OPTIONS.map(o=>[o.k,o.ic]));
 function buildMeetOptions(){
   const el = document.getElementById('meet-options');
-  el.innerHTML = MEET_OPTIONS.map(o=>`<button type="button" data-opt="${o.k}" onclick="pickMeetOption('${o.k}')">${o.ic} ${o.label}</button>`).join('');
+  el.innerHTML = MEET_OPTIONS.map(o=>`<button type="button" data-opt="${o.k}" onclick="pickMeetOption('${o.k}')"><span class="opt-ic">${o.ic}</span>${o.label}</button>`).join('');
 }
 function migrateMeetRecord(rec){
   // older versions stored booleans meaning "meeting in person"
@@ -1120,7 +1367,7 @@ function meetSummary(rec){
   if(!a && !b) return '';
   if(a && b){
     if(a===b){
-      const map={call:'📞 Talking on the phone tonight',video:'🎥 Video date tonight',meet:'✦ Seeing each other tonight ✦',solo:'🌙 Both taking solo time tonight'};
+      const map={call:'Talking on the phone tonight',video:'Video date tonight',meet:'✦ Seeing each other tonight ✦',solo:'Both taking solo time tonight'};
       return map[a] || '';
     }
     return '↔ Different plans tonight — worth a quick check-in';
@@ -1135,7 +1382,7 @@ function renderMeet(){
   const rec = migrateMeetRecord(state.meetNights[dateKey]);
   ['Rey','Meng'].forEach(u=>{
     document.getElementById('meet-'+u).classList.toggle('confirmed', !!rec[u]);
-    document.getElementById('meet-'+u+'-ic').textContent = rec[u] ? MEET_ICON[rec[u]] : '';
+    document.getElementById('meet-'+u+'-ic').innerHTML = rec[u] ? MEET_ICON[rec[u]] : '';
   });
   document.querySelectorAll('#meet-options button').forEach(b=>b.classList.toggle('sel', b.dataset.opt===rec[state.user]));
   const msg = meetSummary(rec);
@@ -1153,32 +1400,52 @@ async function pickMeetOption(key){
 }
 
 /* ===================== DAILY RATING ===================== */
+const RATING_DIMENSIONS = [
+  {k:'mood', ic:'😊', label:'Mood', lo:'Low', hi:'Joyful'},
+  {k:'energy', ic:'⚡', label:'Energy', lo:'Drained', hi:'Energized'},
+  {k:'balance', ic:'🧘', label:'Balance', lo:'Anxious', hi:'Calm'},
+  {k:'connection', ic:'❤️', label:'Connection', lo:'Distant', hi:'Connected'}
+];
 function buildRatingScale(){
-  const el = document.getElementById('rating-scale');
-  el.innerHTML='';
-  for(let i=0;i<=10;i++){
-    const b = document.createElement('button');
-    b.type='button'; b.className='rate-btn'; b.textContent=i;
-    b.onclick=()=>{ selectedRatingValue=i; document.querySelectorAll('.rate-btn').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); };
-    el.appendChild(b);
-  }
+  const el = document.getElementById('rating-dims');
+  el.innerHTML = RATING_DIMENSIONS.map(d=>`
+    <div class="rdim">
+      <div class="rdim-label"><span class="rdim-ic">${d.ic}</span>${d.label}</div>
+      <div class="rdim-slider-row">
+        <span class="rdim-pole">${d.lo}</span>
+        <input type="range" min="0" max="10" value="5" class="rdim-range" data-dim="${d.k}">
+        <span class="rdim-pole hi">${d.hi}</span>
+      </div>
+    </div>`).join('');
+}
+// A saved rating is an object like {mood:7, energy:5, balance:8, connection:6}.
+// Older data (before this feature existed) may just be a single number —
+// averaging a plain number returns itself, so old entries still display fine.
+function ratingAverage(v){
+  if(v===undefined || v===null) return null;
+  if(typeof v==='number') return v;
+  const vals = RATING_DIMENSIONS.map(d=>v[d.k]).filter(x=>typeof x==='number');
+  if(!vals.length) return null;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
 }
 function openRating(){
-  selectedRatingValue=null;
-  document.querySelectorAll('.rate-btn').forEach(x=>x.classList.remove('sel'));
   const existing = (state.dailyRatings[todayStr()]||{})[state.user];
-  if(existing!==undefined && existing!==null){
-    selectedRatingValue=existing;
-    const btn = [...document.querySelectorAll('.rate-btn')].find(b=>Number(b.textContent)===existing);
-    if(btn) btn.classList.add('sel');
-  }
+  const existingObj = (existing && typeof existing==='object') ? existing : {};
+  RATING_DIMENSIONS.forEach(d=>{
+    const input = document.querySelector(`.rdim-range[data-dim="${d.k}"]`);
+    if(input) input.value = (typeof existingObj[d.k]==='number') ? existingObj[d.k] : 5;
+  });
   openModal('rating-modal');
 }
 async function submitRating(){
-  if(selectedRatingValue===null){ toast('Pick a number from 0 to 10'); return; }
   const key = todayStr();
+  const result = {};
+  RATING_DIMENSIONS.forEach(d=>{
+    const input = document.querySelector(`.rdim-range[data-dim="${d.k}"]`);
+    result[d.k] = input ? Number(input.value) : 5;
+  });
   if(!state.dailyRatings[key]) state.dailyRatings[key]={};
-  state.dailyRatings[key][state.user]=selectedRatingValue;
+  state.dailyRatings[key][state.user]=result;
   closeModal('rating-modal');
   renderMood();
   await sSet('daily-ratings', JSON.stringify(state.dailyRatings));
@@ -1188,18 +1455,19 @@ function renderMood(){
   const rec = state.dailyRatings[todayStr()] || {};
   ['Rey','Meng'].forEach(u=>{
     const el = document.getElementById('mood-'+u);
-    if(rec[u]!==undefined && rec[u]!==null){ el.textContent=rec[u]; el.classList.remove('pending'); }
+    const avg = ratingAverage(rec[u]);
+    if(avg!==null){ el.textContent = (Math.round(avg*10)/10).toString(); el.classList.remove('pending'); }
     else { el.textContent='—'; el.classList.add('pending'); }
   });
   const btn = document.getElementById('mood-btn');
-  const mine = rec[state.user];
-  btn.textContent = (mine!==undefined && mine!==null) ? 'Update rating' : 'Rate today';
+  const mine = ratingAverage(rec[state.user]);
+  btn.textContent = (mine!==null) ? 'Update rating' : 'Rate today';
 }
 function maybePromptRating(){
   if(hasPromptedRatingThisSession) return;
   const hour = new Date().getHours();
   const rec = state.dailyRatings[todayStr()] || {};
-  const already = rec[state.user]!==undefined && rec[state.user]!==null;
+  const already = ratingAverage(rec[state.user])!==null;
   if(hour>=18 && !already){
     hasPromptedRatingThisSession=true;
     setTimeout(()=>{ if(!anyModalOpen()) openRating(); }, 900);
@@ -1298,183 +1566,38 @@ function pickPlaceTag(k){
   document.querySelectorAll('#place-tag-pick button').forEach(b=>b.classList.toggle('sel', b.dataset.tag===k));
   document.getElementById('place-custom-tag').value='';
 }
-function updateKeyBanner(){
-  const banner = document.getElementById('key-banner');
-  if(!banner) return;
-  banner.style.display = state.amapKey ? 'none' : 'flex';
-}
-function openAmapKeyModal(){
-  document.getElementById('amap-key-input').value = state.amapKey || '';
-  openModal('amap-key-modal');
-}
-async function saveAmapKey(){
-  const key = document.getElementById('amap-key-input').value.trim();
-  state.amapKey = key;
-  window.AMap = undefined;
-  amapPlaceSearchInstance = null;
-  placesMapInstance = null;
-  await sSet('amap-key', key);
-  closeModal('amap-key-modal');
-  updateKeyBanner();
-  toast(key ? 'Map search enabled ✦' : 'Map key cleared');
-}
-function loadAmapScript(key){
-  return new Promise((resolve, reject)=>{
-    if(window.AMap){ resolve(window.AMap); return; }
-    const s = document.createElement('script');
-    s.src = 'https://webapi.amap.com/maps?v=2.0&key='+encodeURIComponent(key);
-    s.onload = ()=> window.AMap ? resolve(window.AMap) : reject(new Error('Amap failed to load'));
-    s.onerror = ()=> reject(new Error('Could not reach Amap'));
-    document.head.appendChild(s);
-  });
-}
-async function ensureAmapCore(){
-  if(!state.amapKey) throw new Error('no-key');
-  if(!window.AMap) await loadAmapScript(state.amapKey);
-  return window.AMap;
-}
-async function ensurePlaceSearch(){
-  await ensureAmapCore();
-  if(!amapPlaceSearchInstance){
-    await new Promise(resolve=>{
-      window.AMap.plugin('AMap.PlaceSearch', ()=>{
-        amapPlaceSearchInstance = new window.AMap.PlaceSearch({pageSize:8});
-        resolve();
-      });
-    });
-  }
-  return amapPlaceSearchInstance;
-}
-function setPlaceMode(mode){
-  placeMode = mode;
-  document.getElementById('btn-place-mode-search').classList.toggle('active', mode==='search');
-  document.getElementById('btn-place-mode-manual').classList.toggle('active', mode==='manual');
-  document.getElementById('place-search-block').style.display = mode==='search' ? 'block' : 'none';
-  document.getElementById('place-manual-block').style.display = mode==='manual' ? 'block' : 'none';
-}
-function onPlaceSearchInput(){
-  clearTimeout(placeSearchDebounce);
-  pickedAmapPlace = null;
-  const q = document.getElementById('place-search-input').value.trim();
-  const resultsEl = document.getElementById('place-search-results');
-  document.getElementById('place-picked-summary').innerHTML='';
-  if(!q){ resultsEl.innerHTML=''; return; }
-  if(!state.amapKey){
-    resultsEl.innerHTML = '<div class="empty-note">Add an Amap key in settings to search, or switch to manual entry.</div>';
-    return;
-  }
-  placeSearchDebounce = setTimeout(async ()=>{
-    resultsEl.innerHTML = '<div class="empty-note">Searching…</div>';
-    try{
-      const ps = await ensurePlaceSearch();
-      ps.search(q, (status, result)=>{
-        if(status==='complete' && result.poiList && result.poiList.pois && result.poiList.pois.length){
-          window.__lastPois = result.poiList.pois;
-          renderPlaceSearchResults(result.poiList.pois);
-        } else {
-          resultsEl.innerHTML = '<div class="empty-note">No results — try a different search or add manually.</div>';
-        }
-      });
-    }catch(e){
-      resultsEl.innerHTML = '<div class="empty-note">Could not reach Amap. Check your key/connection, or add manually.</div>';
-    }
-  }, 420);
-}
-function renderPlaceSearchResults(pois){
-  const el = document.getElementById('place-search-results');
-  el.innerHTML = pois.map((p,i)=>`
-    <div class="place-result-item" onclick="pickAmapResult(${i})">
-      <div class="prn">${esc(p.name)}</div>
-      <div class="pra">${[p.pname,p.cityname,p.adname].filter(Boolean).map(esc).join(' · ')}${p.address?' — '+esc(p.address):''}</div>
-    </div>`).join('');
-}
-function pickAmapResult(i){
-  const p = (window.__lastPois || [])[i];
-  if(!p) return;
-  pickedAmapPlace = {
-    name: p.name,
-    country: 'China',
-    province: p.pname || '',
-    city: p.cityname || '',
-    district: p.adname || '',
-    street: p.address || '',
-    lng: p.location ? p.location.lng : null,
-    lat: p.location ? p.location.lat : null
-  };
-  document.getElementById('place-search-input').value = p.name;
-  document.getElementById('place-search-results').innerHTML='';
-  renderPickedCard();
-}
-function clearPickedPlace(){
-  pickedAmapPlace = null;
-  document.getElementById('place-search-input').value='';
-  renderPickedCard();
-}
-function renderPickedCard(){
-  const el = document.getElementById('place-picked-summary');
-  if(!pickedAmapPlace){ el.innerHTML=''; return; }
-  const p = pickedAmapPlace;
-  el.innerHTML = `<div class="place-picked-card">
-      <div class="ppn">${esc(p.name)}</div>
-      <div class="ppa">${[p.province,p.city,p.district,p.street].filter(Boolean).map(esc).join(' · ')}</div>
-      <a class="place-picked-clear" onclick="clearPickedPlace()">Clear selection</a>
-    </div>`;
-}
 function openPlaceAdd(){
-  pendingPlacePhoto=null; selectedPlaceTag=null; pickedAmapPlace=null;
+  pendingPlacePhoto=null; selectedPlaceTag=null;
   document.querySelectorAll('#place-tag-pick button').forEach(b=>b.classList.remove('sel'));
   document.getElementById('place-custom-tag').value='';
-  document.getElementById('place-search-input').value='';
-  document.getElementById('place-search-results').innerHTML='';
-  document.getElementById('place-picked-summary').innerHTML='';
   document.getElementById('place-name').value='';
-  document.getElementById('place-country').value='';
-  document.getElementById('place-province').value='';
   document.getElementById('place-city').value='';
-  document.getElementById('place-district').value='';
-  document.getElementById('place-street').value='';
   document.getElementById('place-date').value=todayStr();
   document.getElementById('place-notes').value='';
   document.getElementById('place-photo-preview').style.display='none';
-  setPlaceMode(state.amapKey ? 'search' : 'manual');
   openModal('place-modal');
 }
 async function submitPlace(evt){
   evt.preventDefault();
+  const name = document.getElementById('place-name').value.trim();
+  if(!name){ toast('Give this place a name'); return false; }
   const custom = document.getElementById('place-custom-tag').value.trim();
   const tag = custom || selectedPlaceTag || 'Everyday';
   const date = document.getElementById('place-date').value || todayStr();
   const notes = document.getElementById('place-notes').value.trim();
-  let obj;
-  if(placeMode==='search'){
-    if(!pickedAmapPlace){ toast('Pick a result from the search, or switch to manual entry'); return false; }
-    obj = {
-      id:uid(), author:state.user, name:pickedAmapPlace.name, tag, source:'amap',
-      country:pickedAmapPlace.country, province:pickedAmapPlace.province, city:pickedAmapPlace.city,
-      district:pickedAmapPlace.district, street:pickedAmapPlace.street,
-      lng:pickedAmapPlace.lng, lat:pickedAmapPlace.lat,
-      date, notes, photo:pendingPlacePhoto||null, createdAt:Date.now()
-    };
-  }else{
-    const name = document.getElementById('place-name').value.trim();
-    if(!name){ toast('Give this place a name'); return false; }
-    obj = {
-      id:uid(), author:state.user, name, tag, source:'manual',
-      country:document.getElementById('place-country').value.trim(),
-      province:document.getElementById('place-province').value.trim(),
-      city:document.getElementById('place-city').value.trim(),
-      district:document.getElementById('place-district').value.trim(),
-      street:document.getElementById('place-street').value.trim(),
-      lng:null, lat:null,
-      date, notes, photo:pendingPlacePhoto||null, createdAt:Date.now()
-    };
-  }
+  const city = document.getElementById('place-city').value.trim();
+  const obj = {
+    id:uid(), author:state.user, name, tag, city,
+    date, notes, photo:pendingPlacePhoto||null, createdAt:Date.now()
+  };
   state.places.unshift(obj);
   state.placesIndex.push(obj.id);
   closeModal('place-modal');
   renderPlaces();
-  await sSet('place:'+obj.id, JSON.stringify(obj));
-  await sSet('places-index', JSON.stringify(state.placesIndex));
+  await sMultiSet({
+    ['place:'+obj.id]: JSON.stringify(obj),
+    'places-index': JSON.stringify(state.placesIndex)
+  });
   toast('Place marked ✦');
   return false;
 }
@@ -1482,91 +1605,30 @@ function renderPlaces(){
   const el = document.getElementById('places-grid');
   if(!el) return;
   let html = `<div class="place-add-card" onclick="openPlaceAdd()"><div class="plus">＋</div>Add a place</div>`;
-  html += state.places.map(p=>{
-    const loc = [p.city||p.province, p.country].filter(Boolean).join(', ');
-    return `
+  html += state.places.map(p=>`
     <div class="place-card" onclick="openPlaceDetail('${p.id}')">
       ${p.photo ? `<img src="${p.photo}">` : ''}
       <div class="pcp">
         <div class="pc-top">
           <div class="pc-avatar" style="background:${userColor(p.author)}">${p.author[0]}</div>
-          <div class="pc-loc">${esc(loc)}</div>
+          ${p.city ? `<div class="pc-loc">${esc(p.city)}</div>` : ''}
         </div>
         <h4>${placeTagIcon(p.tag)} ${esc(p.name)}</h4>
-        <div class="pc-addr">${esc([p.province,p.city,p.district].filter(Boolean).join(' · '))}</div>
         <p>${esc(p.notes||'')}</p>
       </div>
-    </div>`;
-  }).join('');
+    </div>`).join('');
   el.innerHTML = html;
-  if(document.getElementById('places-map-wrap').classList.contains('active')) plotPlaceMarkers();
 }
 function openPlaceDetail(id){
   const p = state.places.find(x=>x.id===id); if(!p) return;
   const img = document.getElementById('place-detail-photo');
   if(p.photo){ img.src=p.photo; img.style.display='block'; } else img.style.display='none';
   document.getElementById('place-detail-tag').innerHTML = placeTagIcon(p.tag)+' '+esc(p.tag);
-  document.getElementById('place-detail-breadcrumb').textContent = [p.country,p.province,p.city,p.district,p.street].filter(Boolean).join(' → ');
+  document.getElementById('place-detail-breadcrumb').textContent = p.city || '';
   document.getElementById('place-detail-name').textContent = p.name;
   document.getElementById('place-detail-meta').textContent = p.author + (p.date ? ' · '+p.date : '');
   document.getElementById('place-detail-notes').textContent = p.notes || '';
-  const linksEl = document.getElementById('place-detail-links');
-  linksEl.innerHTML = (p.lng && p.lat)
-    ? `<a href="https://uri.amap.com/marker?position=${p.lng},${p.lat}&name=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">Open in Amap ↗</a>`
-    : '';
   openModal('place-detail-modal');
-}
-async function setPlacesDisplay(mode){
-  document.getElementById('btn-places-list-view').classList.toggle('active', mode==='list');
-  document.getElementById('btn-places-map-view').classList.toggle('active', mode==='map');
-  const grid = document.getElementById('places-grid');
-  const mapWrap = document.getElementById('places-map-wrap');
-  if(mode==='map'){
-    if(!state.amapKey){
-      toast('Add an Amap key first to use the map view');
-      document.getElementById('btn-places-list-view').classList.add('active');
-      document.getElementById('btn-places-map-view').classList.remove('active');
-      openAmapKeyModal();
-      return;
-    }
-    grid.style.display='none';
-    mapWrap.classList.add('active');
-    try{
-      await ensureAmapCore();
-      if(!placesMapInstance){
-        placesMapInstance = new window.AMap.Map('places-amap', {zoom:4, center:[104.1954,35.8617]});
-      }
-      plotPlaceMarkers();
-    }catch(e){
-      toast('Could not load the map — check your key or connection');
-      mapWrap.classList.remove('active');
-      grid.style.display='';
-      document.getElementById('btn-places-list-view').classList.add('active');
-      document.getElementById('btn-places-map-view').classList.remove('active');
-    }
-  }else{
-    mapWrap.classList.remove('active');
-    grid.style.display='';
-  }
-}
-function plotPlaceMarkers(){
-  if(!placesMapInstance || !window.AMap) return;
-  placesMarkers.forEach(m=>m.setMap(null));
-  placesMarkers=[];
-  const withCoords = state.places.filter(p=>p.lng && p.lat);
-  if(!withCoords.length) return;
-  withCoords.forEach(p=>{
-    const color = userColor(p.author);
-    const content = `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);"></div>`;
-    const marker = new window.AMap.Marker({
-      position: [p.lng, p.lat], content, offset: new window.AMap.Pixel(-8,-8), title: p.name
-    });
-    marker.on('click', ()=>openPlaceDetail(p.id));
-    marker.setMap(placesMapInstance);
-    placesMarkers.push(marker);
-  });
-  if(placesMarkers.length===1){ placesMapInstance.setZoomAndCenter(14, [withCoords[0].lng, withCoords[0].lat]); }
-  else{ placesMapInstance.setFitView(placesMarkers); }
 }
 
 /* ===================== MEMOS ===================== */
@@ -1603,8 +1665,10 @@ async function submitMemory(evt){
   state.memoriesIndex.push(obj.id);
   closeModal('memo-modal');
   renderMemos();
-  await sSet('memory:'+obj.id, JSON.stringify(obj));
-  await sSet('memories-index', JSON.stringify(state.memoriesIndex));
+  await sMultiSet({
+    ['memory:'+obj.id]: JSON.stringify(obj),
+    'memories-index': JSON.stringify(state.memoriesIndex)
+  });
   toast('Memory kept ✦');
   return false;
 }
@@ -1632,33 +1696,53 @@ function resizeCvs(){ cvs.width=innerWidth; cvs.height=innerHeight; }
 resizeCvs(); addEventListener('resize', resizeCvs);
 let particles=[];
 let mouseX=innerWidth/2, mouseY=innerHeight/2;
+let lastParticleX=mouseX, lastParticleY=mouseY;
+// Cached per-identity color, updated once on login instead of read from the
+// DOM on every mousemove — that DOM read plus per-move particle spawning
+// was the main source of the input lag.
+let cursorRGB=[59,89,152], cursorHex='#3B5998';
+function setCursorTheme(user){
+  if(user==='Meng'){ cursorRGB=[111,184,222]; cursorHex='#6FB8DE'; }
+  else{ cursorRGB=[59,89,152]; cursorHex='#3B5998'; }
+}
 addEventListener('mousemove', e=>{
   mouseX=e.clientX; mouseY=e.clientY;
-  const isMeng = document.body.getAttribute('data-user')==='Meng';
-  const color = isMeng ? [63,178,238] : [47,79,143];
-  particles.push({x:mouseX,y:mouseY,life:1,r:Math.random()*3+2,c:color});
-  if(particles.length>60) particles.shift();
-});
+}, {passive:true});
 function drawCursorTrail(){
+  // Spawn a new particle only once the pointer has actually travelled a bit,
+  // rather than on every mousemove callback (which can fire far faster than
+  // the screen refreshes) — keeps particle count and work per frame bounded.
+  const dx = mouseX-lastParticleX, dy = mouseY-lastParticleY;
+  if(dx*dx+dy*dy > 36){
+    particles.push({x:mouseX,y:mouseY,life:1,r:Math.random()*3+2});
+    if(particles.length>40) particles.shift();
+    lastParticleX=mouseX; lastParticleY=mouseY;
+  }
   ctx.clearRect(0,0,cvs.width,cvs.height);
-  particles.forEach(p=>{
+  const [r,g,b] = cursorRGB;
+  for(let i=0;i<particles.length;i++){
+    const p = particles[i];
     ctx.beginPath();
     ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);
-    ctx.fillStyle = `rgba(${p.c[0]},${p.c[1]},${p.c[2]},${p.life*0.55})`;
+    ctx.fillStyle = `rgba(${r},${g},${b},${p.life*0.5})`;
     ctx.fill();
-    p.life -= 0.035;
-  });
+    p.life -= 0.06;
+  }
   particles = particles.filter(p=>p.life>0);
+  // Soft glow via a second, larger, low-opacity circle instead of
+  // ctx.shadowBlur — shadow blur is a per-frame convolution and was the
+  // single biggest cost in this loop.
+  ctx.beginPath();
+  ctx.arc(mouseX,mouseY,10,0,Math.PI*2);
+  ctx.fillStyle = `rgba(${r},${g},${b},0.18)`;
+  ctx.fill();
   ctx.beginPath();
   ctx.arc(mouseX,mouseY,5,0,Math.PI*2);
-  const coreColor = document.body.getAttribute('data-user')==='Meng' ? '#3FB2EE' : '#2F4F8F';
-  ctx.fillStyle=coreColor;
-  ctx.shadowColor=coreColor; ctx.shadowBlur=14;
+  ctx.fillStyle = cursorHex;
   ctx.fill();
-  ctx.shadowBlur=0;
   requestAnimationFrame(drawCursorTrail);
 }
-drawCursorTrail();
+requestAnimationFrame(drawCursorTrail);
 
 /* ===================== LOGIN STAR FIELD ===================== */
 const starCvs = document.getElementById('star-canvas');
