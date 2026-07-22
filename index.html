@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Orbit · Rey &amp; Meng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF6EF;
+  --surface:#FFFFFF;
+  --surface-2:#F2EAE0;
+  --ink:#332C25;
+  --ink-soft:#8A7E70;
+  --ink-softer:#B3A99A;
+  --line:rgba(51,44,37,0.09);
+  --night:#1E1930;
+  --night-2:#241E38;
+  --night-3:#302748;
+  --star:#F4EFE6;
+  --accent:#2F4F8F;
+  --accent-2:#5C82C4;
+  --glow:rgba(47,79,143,.5);
+  --radius:20px;
+  --radius-sm:12px;
+  --shadow-soft:0 8px 30px rgba(51,44,37,0.08);
+  --shadow-deep:0 20px 60px rgba(20,15,35,0.35);
+}
+body[data-user="Rey"]{ --accent:#2F4F8F; --accent-2:#5C82C4; --glow:rgba(47,79,143,.55); }
+body[data-user="Meng"]{ --accent:#3FB2EE; --accent-2:#8FDBFF; --glow:rgba(63,178,238,.55); }
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  font-family:'Manrope',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  overflow-x:hidden;
+  cursor:none;
+  -webkit-tap-highlight-color:transparent;
+}
+::selection{background:var(--accent-2); color:#fff;}
+a{color:inherit;}
+.serif{font-family:'Fraunces',serif;}
+.mono{font-family:'IBM Plex Mono',monospace; letter-spacing:.02em;}
+button{font-family:inherit; cursor:none; border:none; background:none; color:inherit;}
+input,textarea,select{font-family:inherit; cursor:none;}
+
+/* touch devices: no custom cursor */
+@media (hover:none){
+  body, button, input, textarea, select, .orbit-node, .photo-drop{cursor:auto !important;}
+  #cursor-canvas{display:none;}
+}
+
+#cursor-canvas{position:fixed; inset:0; width:100vw; height:100vh; pointer-events:none; z-index:9999;}
+
+::-webkit-scrollbar{width:8px; height:8px;}
+::-webkit-scrollbar-thumb{background:var(--ink-softer); border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+/* ================= LOGIN ================= */
+#login-screen{
+  position:fixed; inset:0; z-index:50;
+  display:flex; align-items:center; justify-content:center;
+  background:
+    radial-gradient(60% 50% at 20% 15%, rgba(47,79,143,.20), transparent 60%),
+    radial-gradient(55% 45% at 82% 80%, rgba(63,178,238,.18), transparent 60%),
+    var(--night);
+  overflow:hidden; padding:20px;
+}
+#login-screen .stars{position:absolute; inset:0; opacity:.7;}
+.login-card{position:relative; z-index:2; text-align:center; color:var(--star);}
+.login-eyebrow{font-size:11px; letter-spacing:.34em; text-transform:uppercase; color:rgba(244,239,230,.5); margin-bottom:20px;}
+.login-title{font-size:clamp(34px,6.5vw,58px); font-weight:500; line-height:1.12; margin-bottom:12px;}
+.login-title em{font-style:italic; color:var(--star); background:linear-gradient(90deg,#8FDBFF,#5C82C4); -webkit-background-clip:text; background-clip:text; color:transparent;}
+.login-sub{color:rgba(244,239,230,.55); font-size:14px; margin-bottom:48px;}
+.identity-row{display:flex; gap:22px; justify-content:center; flex-wrap:wrap;}
+.identity-card{
+  width:172px; padding:30px 18px 24px; border-radius:24px;
+  border:1px solid rgba(244,239,230,.14); background:rgba(255,255,255,.03);
+  backdrop-filter:blur(6px); transition:transform .45s cubic-bezier(.2,.8,.2,1), border-color .3s;
+}
+.identity-card:hover{transform:translateY(-8px); border-color:rgba(244,239,230,.3);}
+.identity-card[data-id="Rey"] .id-orb{background:radial-gradient(circle at 35% 30%, #5C82C4, #2F4F8F 60%, #1c3564 100%); box-shadow:0 0 40px rgba(47,79,143,.55);}
+.identity-card[data-id="Meng"] .id-orb{background:radial-gradient(circle at 35% 30%, #CFF0FF, #3FB2EE 60%, #1f8fc9 100%); box-shadow:0 0 40px rgba(63,178,238,.55);}
+.id-orb{width:58px; height:58px; border-radius:50%; margin:0 auto 20px; animation:orbfloat 5s ease-in-out infinite;}
+@keyframes orbfloat{0%,100%{transform:translateY(0);} 50%{transform:translateY(-7px);}}
+.identity-name{font-family:'Fraunces',serif; font-size:22px; font-weight:500; margin-bottom:5px;}
+.identity-hint{font-size:11px; color:rgba(244,239,230,.42); letter-spacing:.06em; text-transform:uppercase;}
+.identity-card button{
+  margin-top:18px; width:100%; padding:11px 0; border-radius:100px; font-size:13px; font-weight:600;
+  background:rgba(244,239,230,.08); color:var(--star); border:1px solid rgba(244,239,230,.16); transition:all .3s;
+}
+.identity-card[data-id="Rey"] button:hover{background:#2F4F8F; color:#fff; border-color:#2F4F8F; box-shadow:0 0 26px rgba(47,79,143,.6);}
+.identity-card[data-id="Meng"] button:hover{background:#3FB2EE; color:#0B2B40; border-color:#3FB2EE; box-shadow:0 0 26px rgba(63,178,238,.6);}
+
+/* ================= APP SHELL ================= */
+#app{display:none; height:100vh; width:100vw; overflow:hidden;}
+#app.active{display:flex;}
+.sidebar{
+  width:88px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--line);
+  display:flex; flex-direction:column; align-items:center; padding:26px 0 20px; gap:6px;
+}
+.sidebar .brand{width:36px; height:36px; border-radius:50%; margin-bottom:26px; background:conic-gradient(from 180deg, var(--accent), var(--accent-2), var(--accent)); box-shadow:0 0 0 4px var(--surface-2);}
+.nav-group{display:contents;}
+.nav-btn{width:56px; height:56px; border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:var(--ink-soft); font-size:10px; transition:all .25s;}
+.nav-btn .ic{font-size:19px;}
+.nav-btn:hover{background:var(--surface-2); color:var(--ink);}
+.nav-btn.active{background:var(--surface-2); color:var(--accent);}
+.sidebar-bottom{margin-top:auto; display:flex; flex-direction:column; align-items:center; gap:12px;}
+.me-chip{width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:600; font-size:15px; background:linear-gradient(150deg, var(--accent-2), var(--accent)); color:#fff; box-shadow:0 0 0 3px var(--surface-2);}
+body[data-user="Meng"] .me-chip{color:#0B2B40;}
+.logout-link{font-size:10px; color:var(--ink-softer);}
+.logout-link:hover{color:var(--ink-soft);}
+
+.main{flex:1; position:relative; overflow:hidden; height:100vh;}
+.view{position:absolute; inset:0; overflow-y:auto; opacity:0; pointer-events:none; transform:translateY(10px); transition:opacity .35s ease, transform .35s ease; -webkit-overflow-scrolling:touch;}
+.view.active{opacity:1; pointer-events:auto; transform:translateY(0);}
+
+.topbar{display:flex; align-items:center; justify-content:space-between; padding:32px 44px 16px; gap:12px; flex-wrap:wrap;}
+.topbar h1{font-family:'Fraunces',serif; font-size:29px; font-weight:500;}
+.topbar-right{display:flex; align-items:center; gap:14px;}
+.date{font-size:12px; color:var(--ink-softer);}
+.live-badge{display:flex; align-items:center; gap:6px; font-size:11px; color:var(--ink-softer);}
+.live-dot{width:7px; height:7px; border-radius:50%; background:#5BC98A; box-shadow:0 0 0 0 rgba(91,201,138,.6); animation:pulseLive 2.2s infinite;}
+@keyframes pulseLive{0%{box-shadow:0 0 0 0 rgba(91,201,138,.55);} 70%{box-shadow:0 0 0 7px rgba(91,201,138,0);} 100%{box-shadow:0 0 0 0 rgba(91,201,138,0);}}
+
+/* ================= HOME / ORBIT ================= */
+#view-home{background:var(--bg);}
+.orbit-wrap{
+  margin:0 44px 30px; border-radius:28px; overflow:hidden; position:relative;
+  height:56vh; min-height:400px; box-shadow:var(--shadow-deep);
+  background:radial-gradient(120% 90% at 30% 10%, rgba(47,79,143,.16), transparent 55%),
+             radial-gradient(100% 80% at 80% 90%, rgba(63,178,238,.16), transparent 55%), var(--night);
+}
+.orbit-wrap svg{width:100%; height:100%; display:block;}
+.orbit-hint{position:absolute; top:20px; left:26px; color:rgba(244,239,230,.5); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;}
+.orbit-legend{position:absolute; top:20px; right:26px; display:flex; gap:16px; font-size:12px; color:rgba(244,239,230,.7);}
+.orbit-legend span{display:flex; align-items:center; gap:6px;}
+.leg-dot{width:8px; height:8px; border-radius:50%;}
+.fab{position:absolute; bottom:22px; right:24px; width:54px; height:54px; border-radius:50%; background:var(--accent); color:#fff; font-size:24px; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 30px var(--glow); transition:transform .3s;}
+body[data-user="Meng"] .fab{color:#0B2B40;}
+.fab:hover{transform:scale(1.08) rotate(90deg);}
+.view-toggle{position:absolute; bottom:24px; left:24px; display:flex; gap:6px; background:rgba(244,239,230,.08); padding:4px; border-radius:100px;}
+.view-toggle button{padding:7px 14px; border-radius:100px; font-size:12px; color:rgba(244,239,230,.6);}
+.view-toggle button.active{background:rgba(244,239,230,.92); color:var(--night);}
+.orbit-node{cursor:none;}
+.orbit-node circle.body{transition:r .2s;}
+.orbit-node:hover circle.body{filter:brightness(1.25);}
+
+.row-below{padding:0 44px 60px; display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:20px;}
+@media(max-width:1080px){.row-below{grid-template-columns:1fr 1fr;}}
+@media(max-width:760px){.row-below{grid-template-columns:1fr;}}
+
+.card{background:var(--surface); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow-soft); border:1px solid var(--line);}
+.card h3{font-family:'Fraunces',serif; font-weight:500; font-size:17px; margin-bottom:14px;}
+.feed-list{display:flex; flex-direction:column; gap:10px; max-height:320px; overflow-y:auto;}
+.feed-item{display:flex; gap:12px; padding:11px; border-radius:14px; align-items:flex-start; transition:background .2s;}
+.feed-item:hover{background:var(--surface-2);}
+.feed-tag-ic{width:32px; height:32px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:15px; background:var(--surface-2);}
+.feed-item .who{font-size:10.5px; color:var(--ink-softer); margin-bottom:2px;}
+.feed-item .txt{font-size:13px; line-height:1.5; color:var(--ink);}
+
+.dark-card{background:linear-gradient(155deg, var(--night-2), var(--night)); color:var(--star); position:relative; overflow:hidden;}
+.dark-card h3{color:var(--star);}
+.dark-card .eyebrow{font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:rgba(244,239,230,.5); margin-bottom:8px;}
+
+.meet-status{display:flex; gap:12px; margin-top:16px;}
+.meet-person{flex:1; border-radius:16px; padding:14px; text-align:center; border:1px solid rgba(244,239,230,.14); background:rgba(244,239,230,.04);}
+.meet-person .pname{font-size:11px; color:rgba(244,239,230,.6); margin-bottom:8px;}
+.meet-person .pdot{width:26px; height:26px; border-radius:50%; margin:0 auto; background:rgba(244,239,230,.14); transition:all .3s; display:flex; align-items:center; justify-content:center; font-size:13px;}
+.meet-person.confirmed .pdot{background:rgba(143,219,255,.22); box-shadow:0 0 14px rgba(143,219,255,.35);}
+.dark-card .tag-pick button{background:rgba(244,239,230,.08); border-color:rgba(244,239,230,.16); color:rgba(244,239,230,.75); font-size:12px; padding:7px 12px;}
+.dark-card .tag-pick button.sel{background:var(--accent-2); color:#0B2B40; border-color:var(--accent-2);}
+.dark-btn{margin-top:18px; width:100%; padding:12px; border-radius:100px; font-size:13px; font-weight:600; background:var(--accent); color:#fff; box-shadow:0 8px 24px var(--glow); transition:transform .2s;}
+body[data-user="Meng"] .dark-btn{color:#0B2B40;}
+.dark-btn:hover{transform:translateY(-2px);}
+.dark-btn.on{background:#8CE0B0; color:#0c3a20; box-shadow:0 8px 24px rgba(140,224,176,.5);}
+.meet-both{margin-top:14px; text-align:center; font-size:12.5px; color:#8FDBFF; opacity:0; transform:translateY(6px); transition:all .4s;}
+.meet-both.show{opacity:1; transform:translateY(0);}
+
+.mood-scores{display:flex; gap:12px; margin-top:16px;}
+.mood-box{flex:1; border-radius:16px; padding:14px; text-align:center; border:1px solid rgba(244,239,230,.14); background:rgba(244,239,230,.04);}
+.mood-box .pname{font-size:11px; color:rgba(244,239,230,.6); margin-bottom:6px;}
+.mood-box .pscore{font-family:'Fraunces',serif; font-size:26px; color:var(--star);}
+.mood-box .pscore.pending{color:rgba(244,239,230,.3); font-size:14px; font-family:'Manrope',sans-serif;}
+
+/* ================= MODALS ================= */
+.modal-overlay{position:fixed; inset:0; background:rgba(30,25,48,.55); backdrop-filter:blur(4px); z-index:200; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .25s; padding:18px;}
+.modal-overlay.show{opacity:1; pointer-events:auto;}
+.modal-box{background:var(--surface); border-radius:24px; width:100%; max-width:440px; max-height:88vh; overflow-y:auto; padding:28px; box-shadow:var(--shadow-deep); transform:translateY(16px) scale(.97); transition:transform .3s; position:relative;}
+.modal-overlay.show .modal-box{transform:translateY(0) scale(1);}
+.modal-close{position:absolute; top:20px; right:24px; font-size:19px; color:var(--ink-softer);}
+.modal-tag{display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:5px 12px; border-radius:100px; background:var(--surface-2); color:var(--ink-soft); margin-bottom:14px;}
+.modal-box img.share-photo{width:100%; border-radius:16px; margin-bottom:16px; display:block;}
+.modal-author{font-size:12px; color:var(--ink-softer); margin-bottom:2px;}
+.modal-text{font-size:15px; line-height:1.7; color:var(--ink); margin-bottom:18px; white-space:pre-wrap;}
+.comments{border-top:1px solid var(--line); padding-top:16px;}
+.comment{display:flex; gap:10px; margin-bottom:14px;}
+.comment-avatar{width:26px; height:26px; border-radius:50%; flex-shrink:0; font-size:11px; display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:600; color:#fff;}
+.comment-body{font-size:13px; line-height:1.5;}
+.comment-body .cname{font-weight:700; margin-right:6px;}
+.comment-time{font-size:10px; color:var(--ink-softer); margin-top:2px;}
+.comment-input-row{display:flex; gap:8px; margin-top:6px;}
+.comment-input-row input{flex:1; padding:11px 14px; border-radius:100px; border:1px solid var(--line); background:var(--surface-2); font-size:13px; outline:none;}
+.comment-input-row input:focus{border-color:var(--accent);}
+.comment-input-row button{width:38px; height:38px; border-radius:50%; background:var(--accent); color:#fff; flex-shrink:0;}
+body[data-user="Meng"] .comment-input-row button{color:#0B2B40;}
+
+form label{display:block; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-softer); margin-bottom:8px; margin-top:18px;}
+form label:first-of-type{margin-top:0;}
+.tag-pick{display:flex; flex-wrap:wrap; gap:8px;}
+.tag-pick button{padding:8px 14px; border-radius:100px; font-size:13px; border:1px solid var(--line); background:var(--surface-2); transition:all .2s;}
+.tag-pick button.sel{background:var(--accent); color:#fff; border-color:var(--accent);}
+body[data-user="Meng"] .tag-pick button.sel{color:#0B2B40;}
+.field-input, textarea.field-input{width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:var(--surface-2); font-size:14px; outline:none; resize:vertical;}
+.field-input:focus{border-color:var(--accent);}
+.photo-drop{border:1.5px dashed var(--line); border-radius:14px; padding:18px; text-align:center; font-size:12px; color:var(--ink-softer); position:relative; overflow:hidden;}
+.photo-drop img{width:100%; border-radius:10px; margin-top:10px;}
+.submit-btn{margin-top:24px; width:100%; padding:14px; border-radius:100px; font-weight:700; font-size:14px; background:var(--accent); color:#fff; box-shadow:0 8px 24px var(--glow); transition:transform .2s;}
+body[data-user="Meng"] .submit-btn{color:#0B2B40;}
+.submit-btn:hover{transform:translateY(-2px);}
+
+/* rating modal */
+.rating-scale{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:8px 0 4px;}
+.rate-btn{width:38px; height:38px; border-radius:12px; border:1px solid var(--line); background:var(--surface-2); font-size:13px; font-weight:600; transition:all .2s;}
+.rate-btn.sel{background:var(--accent); color:#fff; border-color:var(--accent); transform:scale(1.08);}
+body[data-user="Meng"] .rate-btn.sel{color:#0B2B40;}
+.rating-title{text-align:center; font-family:'Fraunces',serif; font-size:22px; margin-bottom:6px;}
+.rating-sub{text-align:center; font-size:13px; color:var(--ink-softer); margin-bottom:18px;}
+.rating-skip{display:block; text-align:center; margin-top:16px; font-size:12px; color:var(--ink-softer);}
+
+/* ================= SCHEDULE ================= */
+.mode-switch{display:flex; gap:8px; margin:0 44px 24px; background:var(--surface-2); padding:5px; border-radius:100px; width:fit-content;}
+.mode-switch button{padding:9px 20px; border-radius:100px; font-size:13px; font-weight:600; color:var(--ink-soft);}
+.mode-switch button.active{background:var(--surface); color:var(--ink); box-shadow:var(--shadow-soft);}
+.personal-grid{margin:0 44px 60px; display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+@media(max-width:760px){.personal-grid{grid-template-columns:1fr;}}
+.person-col{background:var(--surface); border-radius:var(--radius); padding:24px; border:1px solid var(--line); box-shadow:var(--shadow-soft);}
+.person-col-head{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
+.person-col-head .dot{width:12px; height:12px; border-radius:50%;}
+.person-col-head[data-p="Rey"] .dot{background:#2F4F8F;}
+.person-col-head[data-p="Meng"] .dot{background:#3FB2EE;}
+.person-col-head h4{font-family:'Fraunces',serif; font-weight:500; font-size:16px;}
+.sched-item{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); align-items:center;}
+.sched-item:last-child{border-bottom:none;}
+.sched-time{font-size:12px; color:var(--ink-softer); width:56px; flex-shrink:0; font-family:'IBM Plex Mono',monospace;}
+.sched-text{font-size:13.5px; flex:1;}
+.sched-date{font-size:10.5px; color:var(--ink-softer);}
+.sched-del{color:var(--ink-softer); font-size:14px; opacity:0; transition:opacity .2s;}
+.sched-item:hover .sched-del{opacity:1;}
+.add-inline{margin-top:14px; display:flex; gap:8px; align-items:center; font-size:12px; color:var(--ink-softer);}
+.add-inline:hover{color:var(--accent);}
+.empty-note{font-size:12.5px; color:var(--ink-softer); padding:8px 0;}
+.shared-todo{margin:0 44px 60px; max-width:640px;}
+.todo-add-row{display:flex; gap:10px; margin-bottom:20px;}
+.todo-add-row input{flex:1;}
+.todo-add-row button{padding:0 22px; border-radius:12px; background:var(--accent); color:#fff; font-weight:600; font-size:13px;}
+body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
+.todo-item{display:flex; align-items:center; gap:12px; padding:13px 16px; background:var(--surface); border-radius:14px; margin-bottom:8px; border:1px solid var(--line);}
+.todo-check{width:20px; height:20px; border-radius:6px; border:1.5px solid var(--ink-softer); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; transition:all .2s;}
+.todo-check.done{background:var(--accent); border-color:var(--accent); color:#fff;}
+.todo-item .ttext{flex:1; font-size:14px;}
+.todo-item.done .ttext{text-decoration:line-through; color:var(--ink-softer);}
+.todo-item .tby{font-size:10.5px; color:var(--ink-softer);}
+.todo-del{color:var(--ink-softer); opacity:0; transition:opacity .2s;}
+.todo-item:hover .todo-del{opacity:1;}
+
+/* ================= MEMOS ================= */
+.memo-grid{margin:0 44px 60px; display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:18px;}
+.memo-card{background:var(--surface); border-radius:20px; overflow:hidden; border:1px solid var(--line); box-shadow:var(--shadow-soft); cursor:none; transition:transform .3s;}
+.memo-card:hover{transform:translateY(-4px);}
+.memo-card img{width:100%; height:145px; object-fit:cover; display:block;}
+.memo-card .mp{padding:15px;}
+.memo-card .mdate{font-size:10.5px; color:var(--ink-softer); margin-bottom:6px; font-family:'IBM Plex Mono',monospace;}
+.memo-card h4{font-family:'Fraunces',serif; font-size:16px; margin-bottom:6px;}
+.memo-card p{font-size:12.5px; color:var(--ink-soft); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+.memo-add-card{border:1.5px dashed var(--line); border-radius:20px; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:170px; color:var(--ink-softer); font-size:13px; gap:8px;}
+.memo-add-card .plus{font-size:24px;}
+.memo-add-card:hover{border-color:var(--accent); color:var(--accent);}
+
+#toast{position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--night); color:var(--star); padding:12px 22px; border-radius:100px; font-size:13px; z-index:500; opacity:0; pointer-events:none; transition:all .3s;}
+#toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+/* ================= PLACES ================= */
+.places-toolbar{margin:0 44px 22px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;}
+.places-toolbar-left{display:flex; align-items:center; gap:10px;}
+.icon-btn{width:38px; height:38px; border-radius:12px; background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-size:15px; color:var(--ink-soft); border:1px solid var(--line); flex-shrink:0;}
+.icon-btn:hover{color:var(--accent); border-color:var(--accent);}
+.icon-btn.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+body[data-user="Meng"] .icon-btn.active{color:#0B2B40;}
+.place-breadcrumb{font-size:11px; color:var(--ink-softer); margin-bottom:2px;}
+.place-detail-links{margin-top:14px;}
+.place-detail-links a{font-size:12px; color:var(--accent); font-weight:600;}
+.key-banner{margin:0 44px 20px; padding:14px 18px; border-radius:16px; background:var(--surface-2); border:1px solid var(--line); font-size:12.5px; color:var(--ink-soft); display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;}
+.key-banner button{padding:8px 16px; border-radius:100px; background:var(--accent); color:#fff; font-size:12px; font-weight:600; flex-shrink:0;}
+body[data-user="Meng"] .key-banner button{color:#0B2B40;}
+#places-map-wrap{margin:0 44px 60px; border-radius:26px; overflow:hidden; height:52vh; min-height:380px; border:1px solid var(--line); box-shadow:var(--shadow-soft); position:relative; display:none;}
+#places-map-wrap.active{display:block;}
+#places-amap{width:100%; height:100%;}
+.map-pin-label{background:var(--surface); border-radius:10px; padding:4px 9px; font-size:11px; font-weight:600; box-shadow:var(--shadow-soft); white-space:nowrap;}
+.places-grid{margin:0 44px 60px; display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:18px;}
+.place-card{background:var(--surface); border-radius:20px; overflow:hidden; border:1px solid var(--line); box-shadow:var(--shadow-soft); transition:transform .3s;}
+.place-card:hover{transform:translateY(-4px);}
+.place-card img{width:100%; height:130px; object-fit:cover; display:block;}
+.place-card .pcp{padding:15px;}
+.place-card .pc-top{display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+.place-card .pc-avatar{width:22px; height:22px; border-radius:50%; flex-shrink:0; font-size:10px; display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:600; color:#fff;}
+.place-card .pc-loc{font-size:10.5px; color:var(--ink-softer); font-family:'IBM Plex Mono',monospace;}
+.place-card h4{font-family:'Fraunces',serif; font-size:16px; margin-bottom:5px;}
+.place-card .pc-addr{font-size:11.5px; color:var(--ink-soft); margin-bottom:6px;}
+.place-card p{font-size:12.5px; color:var(--ink-soft); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+.place-add-card{border:1.5px dashed var(--line); border-radius:20px; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:170px; color:var(--ink-softer); font-size:13px; gap:8px;}
+.place-add-card .plus{font-size:24px;}
+.place-add-card:hover{border-color:var(--accent); color:var(--accent);}
+
+/* place search / add modal */
+.place-mode-tabs{display:flex; gap:8px; margin-bottom:16px; background:var(--surface-2); padding:4px; border-radius:100px; width:fit-content;}
+.place-mode-tabs button{padding:8px 16px; border-radius:100px; font-size:12.5px; font-weight:600; color:var(--ink-soft);}
+.place-mode-tabs button.active{background:var(--surface); color:var(--ink); box-shadow:var(--shadow-soft);}
+.place-search-results{max-height:220px; overflow-y:auto; border-radius:12px; margin-top:6px;}
+.place-result-item{padding:11px 12px; border-radius:10px; cursor:pointer; transition:background .15s;}
+.place-result-item:hover{background:var(--surface-2);}
+.place-result-item .prn{font-size:13.5px; font-weight:600;}
+.place-result-item .pra{font-size:11px; color:var(--ink-softer); margin-top:2px;}
+.place-picked-card{margin-top:12px; padding:14px; border-radius:14px; background:var(--surface-2); border:1px solid var(--line);}
+.place-picked-card .ppn{font-family:'Fraunces',serif; font-size:16px; margin-bottom:4px;}
+.place-picked-card .ppa{font-size:12px; color:var(--ink-soft); line-height:1.5;}
+.place-picked-clear{font-size:11px; color:var(--ink-softer); margin-top:8px; display:inline-block;}
+.no-key-note{font-size:12px; color:var(--ink-softer); margin-top:8px; line-height:1.5;}
+
+/* ================= RESPONSIVE: TABLET / PHONE ================= */
+@media(max-width:1080px){
+  .topbar, .orbit-wrap, .row-below, .mode-switch, .personal-grid, .shared-todo, .memo-grid, .places-toolbar, .key-banner, #places-map-wrap, .places-grid{margin-left:28px; margin-right:28px;}
+  .topbar{padding-left:28px; padding-right:28px;}
+}
+@media(max-width:760px){
+  #app{flex-direction:column-reverse;}
+  .sidebar{
+    width:100%; height:auto; flex-direction:row; padding:8px 12px calc(8px + env(safe-area-inset-bottom));
+    border-right:none; border-top:1px solid var(--line); justify-content:space-between; align-items:center; gap:0;
+  }
+  .sidebar .brand{display:none;}
+  .nav-group{display:flex; gap:2px; flex:1; justify-content:space-around;}
+  .nav-btn{width:auto; height:auto; padding:6px 8px; flex-direction:column; gap:3px;}
+  .sidebar-bottom{margin-top:0; flex-direction:row; gap:10px;}
+  .logout-link{display:none;}
+  .main{height:calc(100vh - 66px);}
+  .topbar{padding:22px 20px 12px;}
+  .topbar h1{font-size:24px;}
+  .orbit-wrap{height:46vh; min-height:330px;}
+  .orbit-wrap, .row-below, .mode-switch, .personal-grid, .shared-todo, .memo-grid, .places-toolbar, .key-banner, #places-map-wrap, .places-grid{margin-left:20px; margin-right:20px;}
+  .topbar{padding-left:20px; padding-right:20px;}
+  .row-below{grid-template-columns:1fr;}
+}
+@media(max-width:480px){
+  .login-title{font-size:30px;}
+  .identity-row{gap:14px;}
+  .identity-card{width:148px; padding:24px 12px 18px;}
+  .modal-box{padding:22px; border-radius:20px;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="cursor-canvas"></canvas>
+
+<!-- ============ LOGIN ============ -->
+<div id="login-screen">
+  <canvas class="stars" id="star-canvas"></canvas>
+  <div class="login-card">
+    <div class="login-eyebrow">Orbit</div>
+    <div class="login-title serif">Every memory <em>finds its orbit.</em></div>
+    <div class="login-sub">Choose who's signing in.</div>
+    <div class="identity-row">
+      <div class="identity-card" data-id="Rey">
+        <div class="id-orb"></div>
+        <div class="identity-name serif">Rey</div>
+        <div class="identity-hint">Deep Blue</div>
+        <button onclick="login('Rey')">Enter</button>
+      </div>
+      <div class="identity-card" data-id="Meng">
+        <div class="id-orb"></div>
+        <div class="identity-name serif">Meng</div>
+        <div class="identity-hint">Sky Blue</div>
+        <button onclick="login('Meng')">Enter</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app">
+  <div class="sidebar">
+    <div class="brand"></div>
+    <div class="nav-group">
+      <button class="nav-btn active" data-view="home" onclick="switchView('home')"><span class="ic">◐</span><span>Orbit</span></button>
+      <button class="nav-btn" data-view="schedule" onclick="switchView('schedule')"><span class="ic">▤</span><span>Schedule</span></button>
+      <button class="nav-btn" data-view="places" onclick="switchView('places')"><span class="ic">📍</span><span>Places</span></button>
+      <button class="nav-btn" data-view="memos" onclick="switchView('memos')"><span class="ic">✦</span><span>Memos</span></button>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="me-chip" id="me-chip">R</div>
+      <a class="logout-link" onclick="logout()">Switch</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- HOME -->
+    <div class="view active" id="view-home">
+      <div class="topbar">
+        <h1 class="serif">Your Orbit</h1>
+        <div class="topbar-right">
+          <div class="live-badge"><span class="live-dot"></span>Live</div>
+          <div class="date" id="today-label"></div>
+        </div>
+      </div>
+      <div class="orbit-wrap">
+        <div class="orbit-hint">Interleaved orbits</div>
+        <div class="orbit-legend">
+          <span><i class="leg-dot" style="background:#2F4F8F"></i>Rey</span>
+          <span><i class="leg-dot" style="background:#3FB2EE"></i>Meng</span>
+        </div>
+        <svg id="orbit-svg" viewBox="0 0 900 520" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="view-toggle">
+          <button class="active" id="btn-orbit-view" onclick="setOrbitDisplay('orbit')">Orbit</button>
+          <button id="btn-list-view" onclick="setOrbitDisplay('list')">List</button>
+        </div>
+        <button class="fab" onclick="openCompose()" title="Share something new">＋</button>
+      </div>
+      <div class="row-below">
+        <div class="card">
+          <h3>Recent Shares</h3>
+          <div class="feed-list" id="feed-list"></div>
+        </div>
+        <div class="card dark-card">
+          <div class="eyebrow" id="meet-date-label"></div>
+          <h3 class="serif">Tonight's Plan</h3>
+          <div class="meet-status">
+            <div class="meet-person" id="meet-Rey"><div class="pname">Rey</div><div class="pdot" id="meet-Rey-ic"></div></div>
+            <div class="meet-person" id="meet-Meng"><div class="pname">Meng</div><div class="pdot" id="meet-Meng-ic"></div></div>
+          </div>
+          <div class="tag-pick" id="meet-options" style="margin-top:14px; justify-content:center;"></div>
+          <div class="meet-both" id="meet-both-msg"></div>
+        </div>
+        <div class="card dark-card">
+          <div class="eyebrow">Daily check-in</div>
+          <h3 class="serif">Today's Mood</h3>
+          <div class="mood-scores">
+            <div class="mood-box"><div class="pname">Rey</div><div class="pscore pending" id="mood-Rey">—</div></div>
+            <div class="mood-box"><div class="pname">Meng</div><div class="pscore pending" id="mood-Meng">—</div></div>
+          </div>
+          <button class="dark-btn" id="mood-btn" onclick="openRating()">Rate today</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="view" id="view-schedule">
+      <div class="topbar">
+        <h1 class="serif">Schedule</h1>
+        <div class="date" id="today-label-2"></div>
+      </div>
+      <div class="mode-switch">
+        <button class="active" id="btn-mode-personal" onclick="setScheduleMode('personal')">Personal Schedule</button>
+        <button id="btn-mode-shared" onclick="setScheduleMode('shared')">Shared Schedule</button>
+      </div>
+      <div class="personal-grid" id="personal-schedule-block">
+        <div class="person-col">
+          <div class="person-col-head" data-p="Rey"><span class="dot"></span><h4 class="serif">Rey's Time</h4></div>
+          <div id="sched-list-Rey"></div>
+          <div class="add-inline" onclick="openScheduleAdd('Rey')">＋ Add plan</div>
+        </div>
+        <div class="person-col">
+          <div class="person-col-head" data-p="Meng"><span class="dot"></span><h4 class="serif">Meng's Time</h4></div>
+          <div id="sched-list-Meng"></div>
+          <div class="add-inline" onclick="openScheduleAdd('Meng')">＋ Add plan</div>
+        </div>
+      </div>
+      <div class="shared-todo" id="shared-todo-block" style="display:none;">
+        <div class="todo-add-row">
+          <input type="text" id="todo-input" class="field-input" placeholder="Add something to do together…">
+          <button onclick="addTodo()">Add</button>
+        </div>
+        <div id="todo-list"></div>
+      </div>
+    </div>
+
+    <!-- PLACES -->
+    <div class="view" id="view-places">
+      <div class="topbar">
+        <h1 class="serif">Places</h1>
+        <div class="date">Everywhere you've been, together</div>
+      </div>
+      <div class="key-banner" id="key-banner">
+        <span>Add an Amap (高德地图) API key for province/city/district/street-level search on the map — or just add places manually anytime.</span>
+        <button onclick="openAmapKeyModal()">Set up map search</button>
+      </div>
+      <div class="places-toolbar">
+        <div class="places-toolbar-left">
+          <button class="icon-btn active" id="btn-places-list-view" onclick="setPlacesDisplay('list')" title="List view">▤</button>
+          <button class="icon-btn" id="btn-places-map-view" onclick="setPlacesDisplay('map')" title="Map view">📍</button>
+          <button class="icon-btn" onclick="openAmapKeyModal()" title="Map settings">⚙</button>
+        </div>
+        <button class="fab" style="position:static; width:44px; height:44px; font-size:20px;" onclick="openPlaceAdd()" title="Mark a place">＋</button>
+      </div>
+      <div id="places-map-wrap"><div id="places-amap"></div></div>
+      <div class="places-grid" id="places-grid"></div>
+    </div>
+
+    <!-- MEMOS -->
+    <div class="view" id="view-memos">
+      <div class="topbar">
+        <h1 class="serif">Memos</h1>
+        <div class="date">Only the two of you know</div>
+      </div>
+      <div class="memo-grid" id="memo-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Share detail modal ============ -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal-box">
+    <span class="modal-close" onclick="closeModal('detail-modal')">✕</span>
+    <div class="modal-tag" id="detail-tag"></div>
+    <img id="detail-photo" class="share-photo" style="display:none;">
+    <div class="modal-author mono" id="detail-author"></div>
+    <div class="modal-text" id="detail-text"></div>
+    <div class="comments">
+      <div id="detail-comments"></div>
+      <div class="comment-input-row">
+        <input type="text" id="comment-input" placeholder="Write a reply…">
+        <button onclick="submitComment()">↑</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Compose modal ============ -->
+<div class="modal-overlay" id="compose-modal">
+  <div class="modal-box">
+    <span class="modal-close" onclick="closeModal('compose-modal')">✕</span>
+    <h3 class="serif" style="font-size:20px;">Capture this moment</h3>
+    <form onsubmit="return submitShare(event)">
+      <label>Tag</label>
+      <div class="tag-pick" id="tag-pick"></div>
+      <input type="text" id="custom-tag" class="field-input" placeholder="Or type a custom tag…" style="margin-top:10px;">
+      <label>Content</label>
+      <textarea id="share-text" class="field-input" rows="4" placeholder="Write something, in any language…" required></textarea>
+      <label>Photo (optional)</label>
+      <div class="photo-drop" id="photo-drop" onclick="document.getElementById('photo-input').click()">
+        Tap to upload a photo
+        <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="handlePhotoSelect(event,'photo-preview')">
+        <img id="photo-preview" style="display:none;">
+      </div>
+      <button type="submit" class="submit-btn">Share to orbit</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ Schedule add modal ============ -->
+<div class="modal-overlay" id="schedule-modal">
+  <div class="modal-box" style="max-width:380px;">
+    <span class="modal-close" onclick="closeModal('schedule-modal')">✕</span>
+    <h3 class="serif" style="font-size:20px;">Add plan</h3>
+    <form onsubmit="return submitSchedule(event)">
+      <label>Date</label>
+      <input type="date" id="sched-date" class="field-input" required>
+      <label>Time</label>
+      <input type="time" id="sched-time" class="field-input">
+      <label>What is it</label>
+      <input type="text" id="sched-text" class="field-input" placeholder="What's happening…" required>
+      <button type="submit" class="submit-btn">Save</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ Memo add modal ============ -->
+<div class="modal-overlay" id="memo-modal">
+  <div class="modal-box">
+    <span class="modal-close" onclick="closeModal('memo-modal')">✕</span>
+    <h3 class="serif" style="font-size:20px;">New memory</h3>
+    <form onsubmit="return submitMemory(event)">
+      <label>Title</label>
+      <input type="text" id="memo-title" class="field-input" placeholder="Name this memory" required>
+      <label>Date</label>
+      <input type="date" id="memo-date" class="field-input">
+      <label>Story</label>
+      <textarea id="memo-text" class="field-input" rows="4" placeholder="Write the story only you two know…" required></textarea>
+      <label>Photo (optional)</label>
+      <div class="photo-drop" id="memo-photo-drop" onclick="document.getElementById('memo-photo-input').click()">
+        Tap to upload a photo
+        <input type="file" id="memo-photo-input" accept="image/*" style="display:none;" onchange="handlePhotoSelect(event,'memo-photo-preview')">
+        <img id="memo-photo-preview" style="display:none;">
+      </div>
+      <button type="submit" class="submit-btn">Save memory</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ Memo detail modal ============ -->
+<div class="modal-overlay" id="memo-detail-modal">
+  <div class="modal-box">
+    <span class="modal-close" onclick="closeModal('memo-detail-modal')">✕</span>
+    <img id="memo-detail-photo" class="share-photo" style="display:none;">
+    <div class="modal-author mono" id="memo-detail-date"></div>
+    <h3 class="serif" style="font-size:20px; margin:6px 0 12px;" id="memo-detail-title"></h3>
+    <div class="modal-text" id="memo-detail-text"></div>
+  </div>
+</div>
+
+<!-- ============ Daily rating modal ============ -->
+<div class="modal-overlay" id="rating-modal">
+  <div class="modal-box" style="max-width:400px;">
+    <span class="modal-close" onclick="closeModal('rating-modal')">✕</span>
+    <div class="rating-title serif">How was today?</div>
+    <div class="rating-sub">Rate today from 0 (rough) to 10 (wonderful)</div>
+    <div class="rating-scale" id="rating-scale"></div>
+    <button class="submit-btn" onclick="submitRating()">Save rating</button>
+    <a class="rating-skip" onclick="closeModal('rating-modal')">Maybe later</a>
+  </div>
+</div>
+
+<!-- ============ Add place modal ============ -->
+<div class="modal-overlay" id="place-modal">
+  <div class="modal-box">
+    <span class="modal-close" onclick="closeModal('place-modal')">✕</span>
+    <h3 class="serif" style="font-size:20px; margin-bottom:14px;">Mark a place</h3>
+    <div class="place-mode-tabs">
+      <button type="button" class="active" id="btn-place-mode-search" onclick="setPlaceMode('search')">Search map</button>
+      <button type="button" id="btn-place-mode-manual" onclick="setPlaceMode('manual')">Enter manually</button>
+    </div>
+    <form onsubmit="return submitPlace(event)">
+      <div id="place-search-block">
+        <label>Search (Amap · 高德地图)</label>
+        <input type="text" id="place-search-input" class="field-input" placeholder="Search a shop, street, city…" oninput="onPlaceSearchInput()" autocomplete="off">
+        <div class="place-search-results" id="place-search-results"></div>
+        <div id="place-picked-summary"></div>
+        <div class="no-key-note" id="place-search-note">Coverage is strongest within China. For places elsewhere, switch to manual entry.</div>
+      </div>
+      <div id="place-manual-block" style="display:none;">
+        <label>Place name</label>
+        <input type="text" id="place-name" class="field-input" placeholder="Shop, restaurant, spot…">
+        <label>Country</label>
+        <input type="text" id="place-country" class="field-input" placeholder="e.g. China, Japan, France…">
+        <label>Province / State</label>
+        <input type="text" id="place-province" class="field-input" placeholder="e.g. Zhejiang, California…">
+        <label>City</label>
+        <input type="text" id="place-city" class="field-input" placeholder="e.g. Hangzhou, Kyoto…">
+        <label>District</label>
+        <input type="text" id="place-district" class="field-input" placeholder="e.g. Xihu District…">
+        <label>Street / Address</label>
+        <input type="text" id="place-street" class="field-input" placeholder="Street name, number…">
+      </div>
+      <label>Visit type</label>
+      <div class="tag-pick" id="place-tag-pick"></div>
+      <input type="text" id="place-custom-tag" class="field-input" placeholder="Or type a custom type…" style="margin-top:10px;">
+      <label>Date visited</label>
+      <input type="date" id="place-date" class="field-input">
+      <label>Notes</label>
+      <textarea id="place-notes" class="field-input" rows="3" placeholder="What made it worth remembering…"></textarea>
+      <label>Photo (optional)</label>
+      <div class="photo-drop" id="place-photo-drop" onclick="document.getElementById('place-photo-input').click()">
+        Tap to upload a photo
+        <input type="file" id="place-photo-input" accept="image/*" style="display:none;" onchange="handlePhotoSelect(event,'place-photo-preview')">
+        <img id="place-photo-preview" style="display:none;">
+      </div>
+      <button type="submit" class="submit-btn">Save place</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ Amap key settings modal ============ -->
+<div class="modal-overlay" id="amap-key-modal">
+  <div class="modal-box" style="max-width:400px;">
+    <span class="modal-close" onclick="closeModal('amap-key-modal')">✕</span>
+    <h3 class="serif" style="font-size:20px; margin-bottom:10px;">Map search setup</h3>
+    <p style="font-size:12.5px; color:var(--ink-soft); line-height:1.65; margin-bottom:18px;">
+      To search places down to street and shop level on a live map, add a free Amap (高德地图) Web JS API key — get one at <a href="https://lbs.amap.com" target="_blank" rel="noopener" style="color:var(--accent); font-weight:600;">lbs.amap.com</a>. Its coverage is strongest within China. For places elsewhere, manual entry works just as well and needs no key.
+    </p>
+    <label>Amap Web JS API key</label>
+    <input type="text" id="amap-key-input" class="field-input" placeholder="Paste your key here…">
+    <button type="button" class="submit-btn" onclick="saveAmapKey()">Save key</button>
+  </div>
+</div>
+
+<!-- ============ Place detail modal ============ -->
+<div class="modal-overlay" id="place-detail-modal">
+  <div class="modal-box">
+    <span class="modal-close" onclick="closeModal('place-detail-modal')">✕</span>
+    <img id="place-detail-photo" class="share-photo" style="display:none;">
+    <div class="modal-tag" id="place-detail-tag"></div>
+    <div class="place-breadcrumb" id="place-detail-breadcrumb"></div>
+    <h3 class="serif" style="font-size:20px; margin:8px 0 6px;" id="place-detail-name"></h3>
+    <div class="modal-author mono" id="place-detail-meta"></div>
+    <div class="modal-text" id="place-detail-notes"></div>
+    <div class="place-detail-links" id="place-detail-links"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ===================== CONFIG ===================== */
+const TAGS = [
+  {k:'Reading', ic:'📖'}, {k:'Food', ic:'🍜'}, {k:'Inspiration', ic:'💡'},
+  {k:'Mood', ic:'💗'}, {k:'Travel', ic:'✈️'}, {k:'Film', ic:'🎬'}, {k:'Music', ic:'🎵'}
+];
+const TAG_ICON = Object.fromEntries(TAGS.map(t=>[t.k,t.ic]));
+function tagIcon(t){ return TAG_ICON[t] || '🔖'; }
+const PLACE_TAGS = [
+  {k:'Date spot', ic:'💑'}, {k:'Food', ic:'🍽️'}, {k:'Café', ic:'☕'},
+  {k:'Trip', ic:'🧳'}, {k:'Landmark', ic:'🏛️'}, {k:'Stay', ic:'🛏️'}, {k:'Everyday', ic:'📍'}
+];
+const PLACE_TAG_ICON = Object.fromEntries(PLACE_TAGS.map(t=>[t.k,t.ic]));
+function placeTagIcon(t){ return PLACE_TAG_ICON[t] || '📍'; }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+function esc(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtDate(ts){ const d=new Date(ts); return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+const COLOR_REY='#2F4F8F', COLOR_MENG='#3FB2EE';
+function userColor(u){ return u==='Meng' ? COLOR_MENG : COLOR_REY; }
+
+/* ===================== STATE ===================== */
+let state = {
+  user:null,
+  shares:[], sharesIndex:[],
+  memories:[], memoriesIndex:[],
+  todos:[],
+  scheduleRey:[], scheduleMeng:[],
+  meetNights:{},
+  dailyRatings:{},
+  places:[], placesIndex:[],
+  amapKey:''
+};
+let orbitRotationRey=0, orbitRotationMeng=0.9;
+let orbitMode='orbit';
+let scheduleMode='personal';
+let selectedTag=null;
+let pendingPhoto=null, pendingMemoPhoto=null, pendingPlacePhoto=null;
+let selectedRatingValue=null;
+let hasPromptedRatingThisSession=false;
+let pollTimer=null;
+let placeMode='search';
+let selectedPlaceTag=null;
+let pickedAmapPlace=null;
+let amapPlaceSearchInstance=null;
+let placesMapInstance=null, placesMarkers=[];
+let placeSearchDebounce=null;
+
+/* ===================== STORAGE HELPERS ===================== */
+async function sGet(key){
+  try{ const r = await window.storage.get(key, true); return r ? r.value : null; }
+  catch(e){ return null; }
+}
+async function sSet(key,val){
+  try{ return await window.storage.set(key,val,true); }
+  catch(e){ toast('Sync failed — check your connection'); return null; }
+}
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer=setTimeout(()=>t.classList.remove('show'),2400);
+}
+function anyModalOpen(){ return !!document.querySelector('.modal-overlay.show'); }
+
+/* ===================== LOGIN ===================== */
+function login(user){
+  state.user = user;
+  document.body.setAttribute('data-user', user);
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').classList.add('active');
+  document.getElementById('me-chip').textContent = user[0];
+  const dateStr = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',weekday:'long'});
+  document.getElementById('today-label').textContent = dateStr;
+  document.getElementById('today-label-2').textContent = dateStr;
+  document.getElementById('meet-date-label').textContent = 'Tonight · '+todayStr();
+  buildTagPicker();
+  buildMeetOptions();
+  buildRatingScale();
+  buildPlaceTagPicker();
+  loadAll().then(()=>{
+    renderAll();
+    updateKeyBanner();
+    maybePromptRating();
+    startPolling();
+  });
+}
+function logout(){
+  stopPolling();
+  document.body.removeAttribute('data-user');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').classList.remove('active');
+  state.user=null;
+}
+function renderAll(){
+  renderFeed(); renderOrbit(); if(orbitMode==='list') renderOrbitListOverlay(true);
+  renderMeet(); renderSchedule(); renderTodos(); renderMemos(); renderMood(); renderPlaces();
+}
+
+/* ===================== LOAD DATA ===================== */
+async function loadAll(){
+  try{ const idx = await sGet('shares-index'); state.sharesIndex = idx ? JSON.parse(idx) : []; }
+  catch(e){ state.sharesIndex=[]; }
+  const newShares=[];
+  for(const id of state.sharesIndex){
+    const raw = await sGet('share:'+id);
+    if(raw){ try{ newShares.push(JSON.parse(raw)); }catch(e){} }
+  }
+  newShares.sort((a,b)=>b.createdAt-a.createdAt);
+  state.shares = newShares;
+
+  try{ const idx = await sGet('memories-index'); state.memoriesIndex = idx ? JSON.parse(idx) : []; }
+  catch(e){ state.memoriesIndex=[]; }
+  const newMemories=[];
+  for(const id of state.memoriesIndex){
+    const raw = await sGet('memory:'+id);
+    if(raw){ try{ newMemories.push(JSON.parse(raw)); }catch(e){} }
+  }
+  newMemories.sort((a,b)=>(b.date||'').localeCompare(a.date||'') || b.createdAt-a.createdAt);
+  state.memories = newMemories;
+
+  const rawTodos = await sGet('todos');
+  state.todos = rawTodos ? JSON.parse(rawTodos) : [];
+
+  const rr = await sGet('schedule:Rey'); state.scheduleRey = rr ? JSON.parse(rr) : [];
+  const rm = await sGet('schedule:Meng'); state.scheduleMeng = rm ? JSON.parse(rm) : [];
+
+  const mn = await sGet('meet-nights'); state.meetNights = mn ? JSON.parse(mn) : {};
+  const dr = await sGet('daily-ratings'); state.dailyRatings = dr ? JSON.parse(dr) : {};
+
+  try{ const idx = await sGet('places-index'); state.placesIndex = idx ? JSON.parse(idx) : []; }
+  catch(e){ state.placesIndex=[]; }
+  const newPlaces=[];
+  for(const id of state.placesIndex){
+    const raw = await sGet('place:'+id);
+    if(raw){ try{ newPlaces.push(JSON.parse(raw)); }catch(e){} }
+  }
+  newPlaces.sort((a,b)=>b.createdAt-a.createdAt);
+  state.places = newPlaces;
+
+  const ak = await sGet('amap-key'); state.amapKey = ak || '';
+}
+
+/* ===================== REAL-TIME SYNC (polling) ===================== */
+function startPolling(){
+  stopPolling();
+  pollTimer = setInterval(async ()=>{
+    if(anyModalOpen() || document.hidden) return;
+    await loadAll();
+    renderAll();
+    updateKeyBanner();
+  }, 6000);
+  document.addEventListener('visibilitychange', onVisible);
+  window.addEventListener('focus', onVisible);
+}
+function stopPolling(){
+  if(pollTimer) clearInterval(pollTimer);
+  document.removeEventListener('visibilitychange', onVisible);
+  window.removeEventListener('focus', onVisible);
+}
+async function onVisible(){
+  if(document.hidden || !state.user) return;
+  await loadAll();
+  renderAll();
+  updateKeyBanner();
+  maybePromptRating();
+}
+
+/* ===================== NAV ===================== */
+function switchView(name){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===name));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+}
+
+/* ===================== ORBIT VISUALIZATION ===================== */
+const NS='http://www.w3.org/2000/svg';
+function renderOrbit(){
+  const svg = document.getElementById('orbit-svg');
+  svg.innerHTML='';
+  const cx=450, cy=270;
+  const defs = document.createElementNS(NS,'defs');
+  defs.innerHTML = `
+    <radialGradient id="sunGrad" cx="35%" cy="30%">
+      <stop offset="0%" stop-color="#EAF6FF"/>
+      <stop offset="55%" stop-color="#3FB2EE"/>
+      <stop offset="100%" stop-color="#2F4F8F"/>
+    </radialGradient>`;
+  svg.appendChild(defs);
+  const sun = document.createElementNS(NS,'circle');
+  sun.setAttribute('cx',cx); sun.setAttribute('cy',cy); sun.setAttribute('r',22);
+  sun.setAttribute('fill','url(#sunGrad)');
+  svg.appendChild(sun);
+  const sunLabel = document.createElementNS(NS,'text');
+  sunLabel.setAttribute('x',cx); sunLabel.setAttribute('y',cy+5);
+  sunLabel.setAttribute('text-anchor','middle'); sunLabel.setAttribute('font-size','16');
+  sunLabel.textContent='♥'; sunLabel.setAttribute('fill','#1E1930');
+  svg.appendChild(sunLabel);
+
+  drawOrbitFor('Rey', 250, 130, -14, cx, cy, orbitRotationRey, COLOR_REY);
+  drawOrbitFor('Meng', 320, 165, 11, cx, cy, orbitRotationMeng, COLOR_MENG);
+}
+function drawOrbitFor(user, rx, ry, rotDeg, cx, cy, rotation, color){
+  const svg = document.getElementById('orbit-svg');
+  const rad = rotDeg*Math.PI/180;
+  const g = document.createElementNS(NS,'g');
+  g.setAttribute('transform', `translate(${cx},${cy}) rotate(${rotDeg})`);
+  const ring = document.createElementNS(NS,'ellipse');
+  ring.setAttribute('cx',0); ring.setAttribute('cy',0);
+  ring.setAttribute('rx',rx); ring.setAttribute('ry',ry);
+  ring.setAttribute('fill','none'); ring.setAttribute('stroke',color);
+  ring.setAttribute('stroke-opacity','0.28'); ring.setAttribute('stroke-width','1.2');
+  g.appendChild(ring); svg.appendChild(g);
+
+  const items = state.shares.filter(s=>s.author===user);
+  const n = items.length;
+  if(n===0) return;
+  items.forEach((s,i)=>{
+    const angle = rotation + i*(2*Math.PI/n);
+    const lx = rx*Math.cos(angle), ly = ry*Math.sin(angle);
+    const x = cx + lx*Math.cos(rad) - ly*Math.sin(rad);
+    const y = cy + lx*Math.sin(rad) + ly*Math.cos(rad);
+    const node = document.createElementNS(NS,'g');
+    node.setAttribute('class','orbit-node');
+    node.setAttribute('transform',`translate(${x},${y})`);
+    node.onclick = ()=>openDetail(s.id);
+    const glow = document.createElementNS(NS,'circle');
+    glow.setAttribute('r','15'); glow.setAttribute('fill',color); glow.setAttribute('opacity','0.22');
+    node.appendChild(glow);
+    const body = document.createElementNS(NS,'circle');
+    body.setAttribute('class','body'); body.setAttribute('r','13');
+    body.setAttribute('fill', s.photo ? '#fff' : color);
+    body.setAttribute('stroke',color); body.setAttribute('stroke-width','1.5');
+    node.appendChild(body);
+    const txt = document.createElementNS(NS,'text');
+    txt.setAttribute('text-anchor','middle'); txt.setAttribute('y','5'); txt.setAttribute('font-size','13');
+    txt.textContent = tagIcon(s.tag);
+    node.appendChild(txt);
+    svg.appendChild(node);
+  });
+}
+function animateOrbits(){
+  orbitRotationRey += 0.0016;
+  orbitRotationMeng -= 0.0012;
+  if(orbitMode==='orbit' && document.getElementById('view-home')?.classList.contains('active')) renderOrbit();
+  requestAnimationFrame(animateOrbits);
+}
+requestAnimationFrame(animateOrbits);
+
+function setOrbitDisplay(mode){
+  orbitMode = mode;
+  document.getElementById('btn-orbit-view').classList.toggle('active', mode==='orbit');
+  document.getElementById('btn-list-view').classList.toggle('active', mode==='list');
+  const svg = document.getElementById('orbit-svg');
+  if(mode==='list'){ svg.style.display='none'; renderOrbitListOverlay(true); }
+  else{ svg.style.display='block'; renderOrbitListOverlay(false); }
+}
+function renderOrbitListOverlay(show){
+  let el = document.getElementById('orbit-list-overlay');
+  const wrap = document.querySelector('.orbit-wrap');
+  if(!el){
+    el = document.createElement('div');
+    el.id='orbit-list-overlay';
+    el.style.cssText='position:absolute; inset:0; overflow-y:auto; padding:64px 26px 70px; display:flex; flex-direction:column; gap:10px;';
+    wrap.appendChild(el);
+  }
+  el.style.display = show ? 'flex' : 'none';
+  if(!show) return;
+  el.innerHTML = state.shares.length ? state.shares.map(s=>`
+    <div class="feed-item" style="background:rgba(244,239,230,.05); border-radius:14px; cursor:none;" onclick="openDetail('${s.id}')">
+      <div class="feed-tag-ic" style="background:rgba(244,239,230,.1);">${tagIcon(s.tag)}</div>
+      <div>
+        <div class="who mono" style="color:rgba(244,239,230,.5);">${s.author} · ${fmtDate(s.createdAt)} · ${esc(s.tag)}</div>
+        <div class="txt" style="color:var(--star);">${esc(s.text).slice(0,80)}</div>
+      </div>
+    </div>`).join('') : '<div style="color:rgba(244,239,230,.4); font-size:13px; padding:20px;">No shares yet — tap ＋ to start.</div>';
+}
+
+/* ===================== FEED ===================== */
+function renderFeed(){
+  const el = document.getElementById('feed-list');
+  if(!state.shares.length){ el.innerHTML='<div class="empty-note">No shares yet — record your first one ✦</div>'; return; }
+  el.innerHTML = state.shares.slice(0,8).map(s=>`
+    <div class="feed-item" onclick="openDetail('${s.id}')">
+      <div class="feed-tag-ic">${tagIcon(s.tag)}</div>
+      <div>
+        <div class="who mono">${s.author} · ${fmtDate(s.createdAt)}</div>
+        <div class="txt">${esc(s.text).slice(0,70)}${s.text.length>70?'…':''}</div>
+      </div>
+    </div>`).join('');
+}
+
+/* ===================== SHARE DETAIL / COMPOSE ===================== */
+let currentDetailId=null;
+function openDetail(id){
+  const s = state.shares.find(x=>x.id===id);
+  if(!s) return;
+  currentDetailId=id;
+  document.getElementById('detail-tag').innerHTML = tagIcon(s.tag)+' '+esc(s.tag);
+  const img = document.getElementById('detail-photo');
+  if(s.photo){ img.src=s.photo; img.style.display='block'; } else { img.style.display='none'; }
+  document.getElementById('detail-author').textContent = s.author+' · '+fmtDate(s.createdAt);
+  document.getElementById('detail-text').textContent = s.text;
+  renderComments(s);
+  openModal('detail-modal');
+}
+function renderComments(s){
+  const el = document.getElementById('detail-comments');
+  el.innerHTML = (s.comments||[]).map(c=>`
+    <div class="comment">
+      <div class="comment-avatar" style="background:${userColor(c.author)}">${c.author[0]}</div>
+      <div class="comment-body">
+        <span class="cname">${c.author}</span>${esc(c.text)}
+        <div class="comment-time mono">${fmtDate(c.createdAt)}</div>
+      </div>
+    </div>`).join('') || '<div class="empty-note">No comments yet</div>';
+}
+async function submitComment(){
+  const input = document.getElementById('comment-input');
+  const text = input.value.trim();
+  if(!text || !currentDetailId) return;
+  const s = state.shares.find(x=>x.id===currentDetailId);
+  if(!s) return;
+  s.comments = s.comments || [];
+  s.comments.push({id:uid(), author:state.user, text, createdAt:Date.now()});
+  input.value='';
+  renderComments(s);
+  await sSet('share:'+s.id, JSON.stringify(s));
+  renderFeed();
+}
+
+function buildTagPicker(){
+  const el = document.getElementById('tag-pick');
+  el.innerHTML = TAGS.map(t=>`<button type="button" data-tag="${t.k}" onclick="pickTag('${t.k}')">${t.ic} ${t.k}</button>`).join('');
+}
+function pickTag(k){
+  selectedTag = k;
+  document.querySelectorAll('#tag-pick button').forEach(b=>b.classList.toggle('sel', b.dataset.tag===k));
+  document.getElementById('custom-tag').value='';
+}
+function openCompose(){
+  selectedTag=null; pendingPhoto=null;
+  document.querySelectorAll('#tag-pick button').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('custom-tag').value='';
+  document.getElementById('share-text').value='';
+  document.getElementById('photo-preview').style.display='none';
+  document.getElementById('photo-preview').src='';
+  openModal('compose-modal');
+}
+function handlePhotoSelect(evt, previewId){
+  const file = evt.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const canvas = document.createElement('canvas');
+      const maxW = 900;
+      const scale = Math.min(1, maxW/img.width);
+      canvas.width = img.width*scale; canvas.height = img.height*scale;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg',0.68);
+      if(previewId==='photo-preview') pendingPhoto=dataUrl;
+      else if(previewId==='place-photo-preview') pendingPlacePhoto=dataUrl;
+      else pendingMemoPhoto=dataUrl;
+      const prev = document.getElementById(previewId);
+      prev.src=dataUrl; prev.style.display='block';
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+async function submitShare(evt){
+  evt.preventDefault();
+  const custom = document.getElementById('custom-tag').value.trim();
+  const tag = custom || selectedTag;
+  if(!tag){ toast('Pick or type a tag'); return false; }
+  const text = document.getElementById('share-text').value.trim();
+  if(!text) return false;
+  const obj = {id:uid(), author:state.user, tag, text, photo:pendingPhoto||null, createdAt:Date.now(), comments:[]};
+  state.shares.unshift(obj);
+  state.sharesIndex.push(obj.id);
+  closeModal('compose-modal');
+  renderFeed(); renderOrbit(); if(orbitMode==='list') renderOrbitListOverlay(true);
+  await sSet('share:'+obj.id, JSON.stringify(obj));
+  await sSet('shares-index', JSON.stringify(state.sharesIndex));
+  toast('Shared to orbit ✦');
+  return false;
+}
+
+/* ===================== MEET TONIGHT ===================== */
+/* ===================== TONIGHT'S PLAN ===================== */
+const MEET_OPTIONS = [
+  {k:'call', ic:'📞', label:'Phone call'},
+  {k:'video', ic:'🎥', label:'Video call'},
+  {k:'meet', ic:'🤝', label:'Meet in person'},
+  {k:'solo', ic:'🌙', label:'Solo time'}
+];
+const MEET_ICON = Object.fromEntries(MEET_OPTIONS.map(o=>[o.k,o.ic]));
+function buildMeetOptions(){
+  const el = document.getElementById('meet-options');
+  el.innerHTML = MEET_OPTIONS.map(o=>`<button type="button" data-opt="${o.k}" onclick="pickMeetOption('${o.k}')">${o.ic} ${o.label}</button>`).join('');
+}
+function migrateMeetRecord(rec){
+  // older versions stored booleans meaning "meeting in person"
+  const out = {};
+  ['Rey','Meng'].forEach(u=>{
+    const v = rec ? rec[u] : undefined;
+    if(v===true) out[u]='meet';
+    else if(v===false || v===undefined) out[u]=null;
+    else out[u]=v;
+  });
+  return out;
+}
+function meetSummary(rec){
+  const a=rec.Rey, b=rec.Meng;
+  if(!a && !b) return '';
+  if(a && b){
+    if(a===b){
+      const map={call:'📞 Talking on the phone tonight',video:'🎥 Video date tonight',meet:'✦ Seeing each other tonight ✦',solo:'🌙 Both taking solo time tonight'};
+      return map[a] || '';
+    }
+    return '↔ Different plans tonight — worth a quick check-in';
+  }
+  const who = a ? 'Rey' : 'Meng';
+  const val = a || b;
+  const map2 = {call:'wants a call tonight', video:'wants a video call tonight', meet:'wants to meet tonight', solo:'needs some solo time tonight'};
+  return `${who} ${map2[val]}`;
+}
+function renderMeet(){
+  const dateKey = todayStr();
+  const rec = migrateMeetRecord(state.meetNights[dateKey]);
+  ['Rey','Meng'].forEach(u=>{
+    document.getElementById('meet-'+u).classList.toggle('confirmed', !!rec[u]);
+    document.getElementById('meet-'+u+'-ic').textContent = rec[u] ? MEET_ICON[rec[u]] : '';
+  });
+  document.querySelectorAll('#meet-options button').forEach(b=>b.classList.toggle('sel', b.dataset.opt===rec[state.user]));
+  const msg = meetSummary(rec);
+  const msgEl = document.getElementById('meet-both-msg');
+  msgEl.textContent = msg;
+  msgEl.classList.toggle('show', !!msg);
+}
+async function pickMeetOption(key){
+  const dateKey = todayStr();
+  const current = migrateMeetRecord(state.meetNights[dateKey]);
+  current[state.user] = current[state.user]===key ? null : key;
+  state.meetNights[dateKey] = current;
+  renderMeet();
+  await sSet('meet-nights', JSON.stringify(state.meetNights));
+}
+
+/* ===================== DAILY RATING ===================== */
+function buildRatingScale(){
+  const el = document.getElementById('rating-scale');
+  el.innerHTML='';
+  for(let i=0;i<=10;i++){
+    const b = document.createElement('button');
+    b.type='button'; b.className='rate-btn'; b.textContent=i;
+    b.onclick=()=>{ selectedRatingValue=i; document.querySelectorAll('.rate-btn').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); };
+    el.appendChild(b);
+  }
+}
+function openRating(){
+  selectedRatingValue=null;
+  document.querySelectorAll('.rate-btn').forEach(x=>x.classList.remove('sel'));
+  const existing = (state.dailyRatings[todayStr()]||{})[state.user];
+  if(existing!==undefined && existing!==null){
+    selectedRatingValue=existing;
+    const btn = [...document.querySelectorAll('.rate-btn')].find(b=>Number(b.textContent)===existing);
+    if(btn) btn.classList.add('sel');
+  }
+  openModal('rating-modal');
+}
+async function submitRating(){
+  if(selectedRatingValue===null){ toast('Pick a number from 0 to 10'); return; }
+  const key = todayStr();
+  if(!state.dailyRatings[key]) state.dailyRatings[key]={};
+  state.dailyRatings[key][state.user]=selectedRatingValue;
+  closeModal('rating-modal');
+  renderMood();
+  await sSet('daily-ratings', JSON.stringify(state.dailyRatings));
+  toast('Rating saved ✦');
+}
+function renderMood(){
+  const rec = state.dailyRatings[todayStr()] || {};
+  ['Rey','Meng'].forEach(u=>{
+    const el = document.getElementById('mood-'+u);
+    if(rec[u]!==undefined && rec[u]!==null){ el.textContent=rec[u]; el.classList.remove('pending'); }
+    else { el.textContent='—'; el.classList.add('pending'); }
+  });
+  const btn = document.getElementById('mood-btn');
+  const mine = rec[state.user];
+  btn.textContent = (mine!==undefined && mine!==null) ? 'Update rating' : 'Rate today';
+}
+function maybePromptRating(){
+  if(hasPromptedRatingThisSession) return;
+  const hour = new Date().getHours();
+  const rec = state.dailyRatings[todayStr()] || {};
+  const already = rec[state.user]!==undefined && rec[state.user]!==null;
+  if(hour>=18 && !already){
+    hasPromptedRatingThisSession=true;
+    setTimeout(()=>{ if(!anyModalOpen()) openRating(); }, 900);
+  }
+}
+setInterval(()=>{ if(state.user) maybePromptRating(); }, 60000);
+
+/* ===================== SCHEDULE ===================== */
+function setScheduleMode(mode){
+  scheduleMode=mode;
+  document.getElementById('btn-mode-personal').classList.toggle('active', mode==='personal');
+  document.getElementById('btn-mode-shared').classList.toggle('active', mode==='shared');
+  document.getElementById('personal-schedule-block').style.display = mode==='personal' ? 'grid' : 'none';
+  document.getElementById('shared-todo-block').style.display = mode==='shared' ? 'block' : 'none';
+}
+function renderSchedule(){
+  ['Rey','Meng'].forEach(u=>{
+    const list = (u==='Rey' ? state.scheduleRey : state.scheduleMeng).slice().sort((a,b)=>(a.date+ (a.time||'')).localeCompare(b.date+(b.time||'')));
+    const el = document.getElementById('sched-list-'+u);
+    el.innerHTML = list.length ? list.map(it=>`
+      <div class="sched-item">
+        <div class="sched-time mono">${it.time||'--:--'}</div>
+        <div><div class="sched-text">${esc(it.text)}</div><div class="sched-date">${it.date}</div></div>
+        ${ u===state.user ? `<span class="sched-del" onclick="deleteSchedule('${u}','${it.id}')">✕</span>` : ''}
+      </div>`).join('') : '<div class="empty-note">No plans yet</div>';
+  });
+}
+let scheduleTargetUser=null;
+function openScheduleAdd(user){
+  if(user!==state.user){ toast('You can only add your own schedule'); return; }
+  scheduleTargetUser=user;
+  document.getElementById('sched-date').value=todayStr();
+  document.getElementById('sched-time').value='';
+  document.getElementById('sched-text').value='';
+  openModal('schedule-modal');
+}
+async function submitSchedule(evt){
+  evt.preventDefault();
+  const date = document.getElementById('sched-date').value;
+  const time = document.getElementById('sched-time').value;
+  const text = document.getElementById('sched-text').value.trim();
+  if(!date || !text) return false;
+  const item = {id:uid(), date, time, text};
+  if(scheduleTargetUser==='Rey') state.scheduleRey.push(item); else state.scheduleMeng.push(item);
+  closeModal('schedule-modal');
+  renderSchedule();
+  await sSet('schedule:'+scheduleTargetUser, JSON.stringify(scheduleTargetUser==='Rey'?state.scheduleRey:state.scheduleMeng));
+  toast('Added to schedule');
+  return false;
+}
+async function deleteSchedule(user,id){
+  if(user==='Rey') state.scheduleRey = state.scheduleRey.filter(x=>x.id!==id);
+  else state.scheduleMeng = state.scheduleMeng.filter(x=>x.id!==id);
+  renderSchedule();
+  await sSet('schedule:'+user, JSON.stringify(user==='Rey'?state.scheduleRey:state.scheduleMeng));
+}
+
+/* ===================== SHARED TODOS ===================== */
+function renderTodos(){
+  const el = document.getElementById('todo-list');
+  el.innerHTML = state.todos.length ? state.todos.map(t=>`
+    <div class="todo-item ${t.done?'done':''}">
+      <div class="todo-check ${t.done?'done':''}" onclick="toggleTodo('${t.id}')">${t.done?'✓':''}</div>
+      <div class="ttext">${esc(t.text)}</div>
+      <div class="tby mono">${t.addedBy}</div>
+      <div class="todo-del" onclick="deleteTodo('${t.id}')">✕</div>
+    </div>`).join('') : '<div class="empty-note">No shared to-dos yet — add something to do together</div>';
+}
+async function addTodo(){
+  const input = document.getElementById('todo-input');
+  const text = input.value.trim();
+  if(!text) return;
+  state.todos.unshift({id:uid(), text, done:false, addedBy:state.user, createdAt:Date.now()});
+  input.value='';
+  renderTodos();
+  await sSet('todos', JSON.stringify(state.todos));
+}
+async function toggleTodo(id){
+  const t = state.todos.find(x=>x.id===id); if(!t) return;
+  t.done=!t.done; renderTodos();
+  await sSet('todos', JSON.stringify(state.todos));
+}
+async function deleteTodo(id){
+  state.todos = state.todos.filter(x=>x.id!==id);
+  renderTodos();
+  await sSet('todos', JSON.stringify(state.todos));
+}
+
+/* ===================== PLACES ===================== */
+function buildPlaceTagPicker(){
+  const el = document.getElementById('place-tag-pick');
+  el.innerHTML = PLACE_TAGS.map(t=>`<button type="button" data-tag="${t.k}" onclick="pickPlaceTag('${t.k}')">${t.ic} ${t.k}</button>`).join('');
+}
+function pickPlaceTag(k){
+  selectedPlaceTag = k;
+  document.querySelectorAll('#place-tag-pick button').forEach(b=>b.classList.toggle('sel', b.dataset.tag===k));
+  document.getElementById('place-custom-tag').value='';
+}
+function updateKeyBanner(){
+  const banner = document.getElementById('key-banner');
+  if(!banner) return;
+  banner.style.display = state.amapKey ? 'none' : 'flex';
+}
+function openAmapKeyModal(){
+  document.getElementById('amap-key-input').value = state.amapKey || '';
+  openModal('amap-key-modal');
+}
+async function saveAmapKey(){
+  const key = document.getElementById('amap-key-input').value.trim();
+  state.amapKey = key;
+  window.AMap = undefined;
+  amapPlaceSearchInstance = null;
+  placesMapInstance = null;
+  await sSet('amap-key', key);
+  closeModal('amap-key-modal');
+  updateKeyBanner();
+  toast(key ? 'Map search enabled ✦' : 'Map key cleared');
+}
+function loadAmapScript(key){
+  return new Promise((resolve, reject)=>{
+    if(window.AMap){ resolve(window.AMap); return; }
+    const s = document.createElement('script');
+    s.src = 'https://webapi.amap.com/maps?v=2.0&key='+encodeURIComponent(key);
+    s.onload = ()=> window.AMap ? resolve(window.AMap) : reject(new Error('Amap failed to load'));
+    s.onerror = ()=> reject(new Error('Could not reach Amap'));
+    document.head.appendChild(s);
+  });
+}
+async function ensureAmapCore(){
+  if(!state.amapKey) throw new Error('no-key');
+  if(!window.AMap) await loadAmapScript(state.amapKey);
+  return window.AMap;
+}
+async function ensurePlaceSearch(){
+  await ensureAmapCore();
+  if(!amapPlaceSearchInstance){
+    await new Promise(resolve=>{
+      window.AMap.plugin('AMap.PlaceSearch', ()=>{
+        amapPlaceSearchInstance = new window.AMap.PlaceSearch({pageSize:8});
+        resolve();
+      });
+    });
+  }
+  return amapPlaceSearchInstance;
+}
+function setPlaceMode(mode){
+  placeMode = mode;
+  document.getElementById('btn-place-mode-search').classList.toggle('active', mode==='search');
+  document.getElementById('btn-place-mode-manual').classList.toggle('active', mode==='manual');
+  document.getElementById('place-search-block').style.display = mode==='search' ? 'block' : 'none';
+  document.getElementById('place-manual-block').style.display = mode==='manual' ? 'block' : 'none';
+}
+function onPlaceSearchInput(){
+  clearTimeout(placeSearchDebounce);
+  pickedAmapPlace = null;
+  const q = document.getElementById('place-search-input').value.trim();
+  const resultsEl = document.getElementById('place-search-results');
+  document.getElementById('place-picked-summary').innerHTML='';
+  if(!q){ resultsEl.innerHTML=''; return; }
+  if(!state.amapKey){
+    resultsEl.innerHTML = '<div class="empty-note">Add an Amap key in settings to search, or switch to manual entry.</div>';
+    return;
+  }
+  placeSearchDebounce = setTimeout(async ()=>{
+    resultsEl.innerHTML = '<div class="empty-note">Searching…</div>';
+    try{
+      const ps = await ensurePlaceSearch();
+      ps.search(q, (status, result)=>{
+        if(status==='complete' && result.poiList && result.poiList.pois && result.poiList.pois.length){
+          window.__lastPois = result.poiList.pois;
+          renderPlaceSearchResults(result.poiList.pois);
+        } else {
+          resultsEl.innerHTML = '<div class="empty-note">No results — try a different search or add manually.</div>';
+        }
+      });
+    }catch(e){
+      resultsEl.innerHTML = '<div class="empty-note">Could not reach Amap. Check your key/connection, or add manually.</div>';
+    }
+  }, 420);
+}
+function renderPlaceSearchResults(pois){
+  const el = document.getElementById('place-search-results');
+  el.innerHTML = pois.map((p,i)=>`
+    <div class="place-result-item" onclick="pickAmapResult(${i})">
+      <div class="prn">${esc(p.name)}</div>
+      <div class="pra">${[p.pname,p.cityname,p.adname].filter(Boolean).map(esc).join(' · ')}${p.address?' — '+esc(p.address):''}</div>
+    </div>`).join('');
+}
+function pickAmapResult(i){
+  const p = (window.__lastPois || [])[i];
+  if(!p) return;
+  pickedAmapPlace = {
+    name: p.name,
+    country: 'China',
+    province: p.pname || '',
+    city: p.cityname || '',
+    district: p.adname || '',
+    street: p.address || '',
+    lng: p.location ? p.location.lng : null,
+    lat: p.location ? p.location.lat : null
+  };
+  document.getElementById('place-search-input').value = p.name;
+  document.getElementById('place-search-results').innerHTML='';
+  renderPickedCard();
+}
+function clearPickedPlace(){
+  pickedAmapPlace = null;
+  document.getElementById('place-search-input').value='';
+  renderPickedCard();
+}
+function renderPickedCard(){
+  const el = document.getElementById('place-picked-summary');
+  if(!pickedAmapPlace){ el.innerHTML=''; return; }
+  const p = pickedAmapPlace;
+  el.innerHTML = `<div class="place-picked-card">
+      <div class="ppn">${esc(p.name)}</div>
+      <div class="ppa">${[p.province,p.city,p.district,p.street].filter(Boolean).map(esc).join(' · ')}</div>
+      <a class="place-picked-clear" onclick="clearPickedPlace()">Clear selection</a>
+    </div>`;
+}
+function openPlaceAdd(){
+  pendingPlacePhoto=null; selectedPlaceTag=null; pickedAmapPlace=null;
+  document.querySelectorAll('#place-tag-pick button').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('place-custom-tag').value='';
+  document.getElementById('place-search-input').value='';
+  document.getElementById('place-search-results').innerHTML='';
+  document.getElementById('place-picked-summary').innerHTML='';
+  document.getElementById('place-name').value='';
+  document.getElementById('place-country').value='';
+  document.getElementById('place-province').value='';
+  document.getElementById('place-city').value='';
+  document.getElementById('place-district').value='';
+  document.getElementById('place-street').value='';
+  document.getElementById('place-date').value=todayStr();
+  document.getElementById('place-notes').value='';
+  document.getElementById('place-photo-preview').style.display='none';
+  setPlaceMode(state.amapKey ? 'search' : 'manual');
+  openModal('place-modal');
+}
+async function submitPlace(evt){
+  evt.preventDefault();
+  const custom = document.getElementById('place-custom-tag').value.trim();
+  const tag = custom || selectedPlaceTag || 'Everyday';
+  const date = document.getElementById('place-date').value || todayStr();
+  const notes = document.getElementById('place-notes').value.trim();
+  let obj;
+  if(placeMode==='search'){
+    if(!pickedAmapPlace){ toast('Pick a result from the search, or switch to manual entry'); return false; }
+    obj = {
+      id:uid(), author:state.user, name:pickedAmapPlace.name, tag, source:'amap',
+      country:pickedAmapPlace.country, province:pickedAmapPlace.province, city:pickedAmapPlace.city,
+      district:pickedAmapPlace.district, street:pickedAmapPlace.street,
+      lng:pickedAmapPlace.lng, lat:pickedAmapPlace.lat,
+      date, notes, photo:pendingPlacePhoto||null, createdAt:Date.now()
+    };
+  }else{
+    const name = document.getElementById('place-name').value.trim();
+    if(!name){ toast('Give this place a name'); return false; }
+    obj = {
+      id:uid(), author:state.user, name, tag, source:'manual',
+      country:document.getElementById('place-country').value.trim(),
+      province:document.getElementById('place-province').value.trim(),
+      city:document.getElementById('place-city').value.trim(),
+      district:document.getElementById('place-district').value.trim(),
+      street:document.getElementById('place-street').value.trim(),
+      lng:null, lat:null,
+      date, notes, photo:pendingPlacePhoto||null, createdAt:Date.now()
+    };
+  }
+  state.places.unshift(obj);
+  state.placesIndex.push(obj.id);
+  closeModal('place-modal');
+  renderPlaces();
+  await sSet('place:'+obj.id, JSON.stringify(obj));
+  await sSet('places-index', JSON.stringify(state.placesIndex));
+  toast('Place marked ✦');
+  return false;
+}
+function renderPlaces(){
+  const el = document.getElementById('places-grid');
+  if(!el) return;
+  let html = `<div class="place-add-card" onclick="openPlaceAdd()"><div class="plus">＋</div>Add a place</div>`;
+  html += state.places.map(p=>{
+    const loc = [p.city||p.province, p.country].filter(Boolean).join(', ');
+    return `
+    <div class="place-card" onclick="openPlaceDetail('${p.id}')">
+      ${p.photo ? `<img src="${p.photo}">` : ''}
+      <div class="pcp">
+        <div class="pc-top">
+          <div class="pc-avatar" style="background:${userColor(p.author)}">${p.author[0]}</div>
+          <div class="pc-loc">${esc(loc)}</div>
+        </div>
+        <h4>${placeTagIcon(p.tag)} ${esc(p.name)}</h4>
+        <div class="pc-addr">${esc([p.province,p.city,p.district].filter(Boolean).join(' · '))}</div>
+        <p>${esc(p.notes||'')}</p>
+      </div>
+    </div>`;
+  }).join('');
+  el.innerHTML = html;
+  if(document.getElementById('places-map-wrap').classList.contains('active')) plotPlaceMarkers();
+}
+function openPlaceDetail(id){
+  const p = state.places.find(x=>x.id===id); if(!p) return;
+  const img = document.getElementById('place-detail-photo');
+  if(p.photo){ img.src=p.photo; img.style.display='block'; } else img.style.display='none';
+  document.getElementById('place-detail-tag').innerHTML = placeTagIcon(p.tag)+' '+esc(p.tag);
+  document.getElementById('place-detail-breadcrumb').textContent = [p.country,p.province,p.city,p.district,p.street].filter(Boolean).join(' → ');
+  document.getElementById('place-detail-name').textContent = p.name;
+  document.getElementById('place-detail-meta').textContent = p.author + (p.date ? ' · '+p.date : '');
+  document.getElementById('place-detail-notes').textContent = p.notes || '';
+  const linksEl = document.getElementById('place-detail-links');
+  linksEl.innerHTML = (p.lng && p.lat)
+    ? `<a href="https://uri.amap.com/marker?position=${p.lng},${p.lat}&name=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">Open in Amap ↗</a>`
+    : '';
+  openModal('place-detail-modal');
+}
+async function setPlacesDisplay(mode){
+  document.getElementById('btn-places-list-view').classList.toggle('active', mode==='list');
+  document.getElementById('btn-places-map-view').classList.toggle('active', mode==='map');
+  const grid = document.getElementById('places-grid');
+  const mapWrap = document.getElementById('places-map-wrap');
+  if(mode==='map'){
+    if(!state.amapKey){
+      toast('Add an Amap key first to use the map view');
+      document.getElementById('btn-places-list-view').classList.add('active');
+      document.getElementById('btn-places-map-view').classList.remove('active');
+      openAmapKeyModal();
+      return;
+    }
+    grid.style.display='none';
+    mapWrap.classList.add('active');
+    try{
+      await ensureAmapCore();
+      if(!placesMapInstance){
+        placesMapInstance = new window.AMap.Map('places-amap', {zoom:4, center:[104.1954,35.8617]});
+      }
+      plotPlaceMarkers();
+    }catch(e){
+      toast('Could not load the map — check your key or connection');
+      mapWrap.classList.remove('active');
+      grid.style.display='';
+      document.getElementById('btn-places-list-view').classList.add('active');
+      document.getElementById('btn-places-map-view').classList.remove('active');
+    }
+  }else{
+    mapWrap.classList.remove('active');
+    grid.style.display='';
+  }
+}
+function plotPlaceMarkers(){
+  if(!placesMapInstance || !window.AMap) return;
+  placesMarkers.forEach(m=>m.setMap(null));
+  placesMarkers=[];
+  const withCoords = state.places.filter(p=>p.lng && p.lat);
+  if(!withCoords.length) return;
+  withCoords.forEach(p=>{
+    const color = userColor(p.author);
+    const content = `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);"></div>`;
+    const marker = new window.AMap.Marker({
+      position: [p.lng, p.lat], content, offset: new window.AMap.Pixel(-8,-8), title: p.name
+    });
+    marker.on('click', ()=>openPlaceDetail(p.id));
+    marker.setMap(placesMapInstance);
+    placesMarkers.push(marker);
+  });
+  if(placesMarkers.length===1){ placesMapInstance.setZoomAndCenter(14, [withCoords[0].lng, withCoords[0].lat]); }
+  else{ placesMapInstance.setFitView(placesMarkers); }
+}
+
+/* ===================== MEMOS ===================== */
+function renderMemos(){
+  const el = document.getElementById('memo-grid');
+  let html = `<div class="memo-add-card" onclick="openMemoAdd()"><div class="plus">＋</div>Add a memory</div>`;
+  html += state.memories.map(m=>`
+    <div class="memo-card" onclick="openMemoDetail('${m.id}')">
+      ${m.photo ? `<img src="${m.photo}">` : ''}
+      <div class="mp">
+        <div class="mdate">${m.date||''} · ${m.author}</div>
+        <h4>${esc(m.title)}</h4>
+        <p>${esc(m.text)}</p>
+      </div>
+    </div>`).join('');
+  el.innerHTML = html;
+}
+function openMemoAdd(){
+  pendingMemoPhoto=null;
+  document.getElementById('memo-title').value='';
+  document.getElementById('memo-date').value=todayStr();
+  document.getElementById('memo-text').value='';
+  document.getElementById('memo-photo-preview').style.display='none';
+  openModal('memo-modal');
+}
+async function submitMemory(evt){
+  evt.preventDefault();
+  const title = document.getElementById('memo-title').value.trim();
+  const date = document.getElementById('memo-date').value || todayStr();
+  const text = document.getElementById('memo-text').value.trim();
+  if(!title || !text) return false;
+  const obj = {id:uid(), title, date, text, photo:pendingMemoPhoto||null, author:state.user, createdAt:Date.now()};
+  state.memories.unshift(obj);
+  state.memoriesIndex.push(obj.id);
+  closeModal('memo-modal');
+  renderMemos();
+  await sSet('memory:'+obj.id, JSON.stringify(obj));
+  await sSet('memories-index', JSON.stringify(state.memoriesIndex));
+  toast('Memory kept ✦');
+  return false;
+}
+function openMemoDetail(id){
+  const m = state.memories.find(x=>x.id===id); if(!m) return;
+  const img = document.getElementById('memo-detail-photo');
+  if(m.photo){ img.src=m.photo; img.style.display='block'; } else img.style.display='none';
+  document.getElementById('memo-detail-date').textContent = (m.date||'')+' · '+m.author;
+  document.getElementById('memo-detail-title').textContent = m.title;
+  document.getElementById('memo-detail-text').textContent = m.text;
+  openModal('memo-detail-modal');
+}
+
+/* ===================== MODAL HELPERS ===================== */
+function openModal(id){ document.getElementById(id).classList.add('show'); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click', e=>{ if(e.target===m) m.classList.remove('show'); });
+});
+
+/* ===================== CURSOR TRAIL ===================== */
+const cvs = document.getElementById('cursor-canvas');
+const ctx = cvs.getContext('2d');
+function resizeCvs(){ cvs.width=innerWidth; cvs.height=innerHeight; }
+resizeCvs(); addEventListener('resize', resizeCvs);
+let particles=[];
+let mouseX=innerWidth/2, mouseY=innerHeight/2;
+addEventListener('mousemove', e=>{
+  mouseX=e.clientX; mouseY=e.clientY;
+  const isMeng = document.body.getAttribute('data-user')==='Meng';
+  const color = isMeng ? [63,178,238] : [47,79,143];
+  particles.push({x:mouseX,y:mouseY,life:1,r:Math.random()*3+2,c:color});
+  if(particles.length>60) particles.shift();
+});
+function drawCursorTrail(){
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  particles.forEach(p=>{
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);
+    ctx.fillStyle = `rgba(${p.c[0]},${p.c[1]},${p.c[2]},${p.life*0.55})`;
+    ctx.fill();
+    p.life -= 0.035;
+  });
+  particles = particles.filter(p=>p.life>0);
+  ctx.beginPath();
+  ctx.arc(mouseX,mouseY,5,0,Math.PI*2);
+  const coreColor = document.body.getAttribute('data-user')==='Meng' ? '#3FB2EE' : '#2F4F8F';
+  ctx.fillStyle=coreColor;
+  ctx.shadowColor=coreColor; ctx.shadowBlur=14;
+  ctx.fill();
+  ctx.shadowBlur=0;
+  requestAnimationFrame(drawCursorTrail);
+}
+drawCursorTrail();
+
+/* ===================== LOGIN STAR FIELD ===================== */
+const starCvs = document.getElementById('star-canvas');
+const sctx = starCvs.getContext('2d');
+function resizeStars(){ starCvs.width=innerWidth; starCvs.height=innerHeight; }
+resizeStars(); addEventListener('resize', resizeStars);
+const stars = Array.from({length:110}, ()=>({x:Math.random()*innerWidth, y:Math.random()*innerHeight, r:Math.random()*1.3+0.2, tw:Math.random()*Math.PI*2}));
+function drawStars(t){
+  sctx.clearRect(0,0,starCvs.width,starCvs.height);
+  stars.forEach(s=>{
+    const alpha = 0.35+0.5*Math.abs(Math.sin(s.tw + t*0.0006));
+    sctx.beginPath();
+    sctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    sctx.fillStyle=`rgba(244,239,230,${alpha})`;
+    sctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+requestAnimationFrame(drawStars);
+</script>
+</body>
+</html>
