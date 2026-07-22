@@ -99,21 +99,18 @@ input,textarea,select{font-family:inherit; cursor:none;}
 .login-title em{font-style:italic; background:linear-gradient(90deg,#BFE3F2,#7C97C9); -webkit-background-clip:text; background-clip:text; color:transparent;}
 .login-sub{color:rgba(244,239,230,.55); font-size:14px; margin-bottom:48px;}
 
-/* click-to-enter transition */
-#star-transition{
-  position:fixed; inset:0; z-index:90; opacity:0; pointer-events:none;
-  transition:opacity .35s ease;
+/* click-to-enter transition: a quick pulse on the star, then a smooth
+   crossfade from the login screen into the app — no full-screen flare. */
+#login-screen{transition:opacity .38s ease, transform .38s ease;}
+#login-screen.fading-out{opacity:0; transform:scale(1.02); pointer-events:none;}
+.id-star.star-clicked{animation:starClickPulse .4s ease;}
+@keyframes starClickPulse{
+  0%{transform:scale(1);}
+  35%{transform:scale(1.22); filter:brightness(1.35);}
+  100%{transform:scale(1); filter:brightness(1);}
 }
-#star-transition.active{opacity:1; pointer-events:all;}
-.st-burst{
-  position:fixed; left:50%; top:50%; width:20px; height:20px; border-radius:50%;
-  background:radial-gradient(circle, #fff 0%, var(--bcolor,#6FB8DE) 45%, var(--bcolor,#6FB8DE) 100%);
-  transform:translate(-50%,-50%) scale(0);
-}
-#star-transition.active .st-burst{
-  animation:burstExpand .68s cubic-bezier(.3,.7,.3,1) forwards;
-}
-@keyframes burstExpand{ to{ transform:translate(-50%,-50%) scale(70); } }
+@keyframes appFadeIn{ from{opacity:0; transform:scale(.985);} to{opacity:1; transform:scale(1);} }
+#app.active{animation:appFadeIn .45s ease;}
 .identity-row{display:flex; gap:22px; justify-content:center; flex-wrap:wrap;}
 .identity-card{
   width:172px; padding:30px 18px 24px; border-radius:24px;
@@ -293,7 +290,9 @@ body[data-user="Meng"] .tag-pick button.sel{color:#0B2B40;}
 .field-input, textarea.field-input{width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:var(--surface-2); font-size:14px; outline:none; resize:vertical;}
 .field-input:focus{border-color:var(--accent);}
 .photo-drop{border:1.5px dashed var(--line); border-radius:14px; padding:18px; text-align:center; font-size:12px; color:var(--ink-softer); position:relative; overflow:hidden;}
-.photo-drop img{width:100%; border-radius:10px; margin-top:10px;}
+.photo-drop img{width:100%; border-radius:10px; margin-top:10px; position:relative; z-index:1;}
+.photo-drop-input{position:absolute; inset:0; width:100%; height:100%; opacity:0; z-index:2; cursor:pointer; -webkit-appearance:none;}
+.photo-drop-label{position:relative; z-index:1; pointer-events:none;}
 .submit-btn{margin-top:24px; width:100%; padding:14px; border-radius:100px; font-weight:700; font-size:14px; background:var(--accent); color:#fff; box-shadow:0 8px 24px var(--glow); transition:transform .2s;}
 body[data-user="Meng"] .submit-btn{color:#0B2B40;}
 .submit-btn:hover{transform:translateY(-2px);}
@@ -532,10 +531,6 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
   </div>
 </div>
 
-<div id="star-transition">
-  <div class="st-burst"></div>
-</div>
-
 <!-- ============ APP ============ -->
 <div id="app">
   <div class="sidebar">
@@ -687,9 +682,9 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
       <label>Content</label>
       <textarea id="share-text" class="field-input" rows="4" placeholder="Write something, in any language…" required></textarea>
       <label>Photo (optional)</label>
-      <div class="photo-drop" id="photo-drop" onclick="document.getElementById('photo-input').click()">
-        Tap to upload a photo
-        <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="handlePhotoSelect(event,'photo-preview')">
+      <div class="photo-drop" id="photo-drop">
+        <span class="photo-drop-label">Tap to upload a photo</span>
+        <input type="file" id="photo-input" class="photo-drop-input" accept="image/*" onchange="handlePhotoSelect(event,'photo-preview')">
         <img id="photo-preview" style="display:none;">
       </div>
       <button type="submit" class="submit-btn">Share to orbit</button>
@@ -727,9 +722,9 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
       <label>Story</label>
       <textarea id="memo-text" class="field-input" rows="4" placeholder="Write the story only you two know…" required></textarea>
       <label>Photo (optional)</label>
-      <div class="photo-drop" id="memo-photo-drop" onclick="document.getElementById('memo-photo-input').click()">
-        Tap to upload a photo
-        <input type="file" id="memo-photo-input" accept="image/*" style="display:none;" onchange="handlePhotoSelect(event,'memo-photo-preview')">
+      <div class="photo-drop" id="memo-photo-drop">
+        <span class="photo-drop-label">Tap to upload a photo</span>
+        <input type="file" id="memo-photo-input" class="photo-drop-input" accept="image/*" onchange="handlePhotoSelect(event,'memo-photo-preview')">
         <img id="memo-photo-preview" style="display:none;">
       </div>
       <button type="submit" class="submit-btn">Save memory</button>
@@ -778,9 +773,9 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
       <label>Notes</label>
       <textarea id="place-notes" class="field-input" rows="3" placeholder="What made it worth remembering…"></textarea>
       <label>Photo (optional)</label>
-      <div class="photo-drop" id="place-photo-drop" onclick="document.getElementById('place-photo-input').click()">
-        Tap to upload a photo
-        <input type="file" id="place-photo-input" accept="image/*" style="display:none;" onchange="handlePhotoSelect(event,'place-photo-preview')">
+      <div class="photo-drop" id="place-photo-drop">
+        <span class="photo-drop-label">Tap to upload a photo</span>
+        <input type="file" id="place-photo-input" class="photo-drop-input" accept="image/*" onchange="handlePhotoSelect(event,'place-photo-preview')">
         <img id="place-photo-preview" style="display:none;">
       </div>
       <button type="submit" class="submit-btn">Save place</button>
@@ -925,22 +920,17 @@ function handleStarClick(user){
   if(starTransitioning) return;
   starTransitioning = true;
   const starEl = document.querySelector(`.identity-card[data-id="${user}"] .id-star`);
-  const rect = starEl.getBoundingClientRect();
-  const overlay = document.getElementById('star-transition');
-  const burst = overlay.querySelector('.st-burst');
-  burst.style.left = (rect.left + rect.width/2) + 'px';
-  burst.style.top = (rect.top + rect.height/2) + 'px';
-  burst.style.setProperty('--bcolor', user==='Meng' ? '#6FB8DE' : '#3B5998');
-  overlay.classList.add('active');
-  setTimeout(()=>{ login(user); }, 560);
+  starEl.classList.add('star-clicked');
+  const loginScreen = document.getElementById('login-screen');
+  loginScreen.classList.add('fading-out');
   setTimeout(()=>{
-    overlay.classList.remove('active');
+    login(user);
     starTransitioning = false;
-  }, 780);
+  }, 340);
 }
 function login(user){
-  if(!FIREBASE_CONFIGURED){ toast('This page isn\'t connected to a database yet — see the setup notice'); return; }
-  if(!initFirebase()){ toast('Could not connect — check your Firebase setup'); return; }
+  if(!FIREBASE_CONFIGURED){ toast('This page isn\'t connected to a database yet — see the setup notice'); document.getElementById('login-screen').classList.remove('fading-out'); return; }
+  if(!initFirebase()){ toast('Could not connect — check your Firebase setup'); document.getElementById('login-screen').classList.remove('fading-out'); return; }
   state.user = user;
   document.body.setAttribute('data-user', user);
   setCursorTheme(user);
@@ -965,7 +955,10 @@ function login(user){
 function logout(){
   stopRealtimeSync();
   document.body.removeAttribute('data-user');
-  document.getElementById('login-screen').style.display='flex';
+  const loginScreen = document.getElementById('login-screen');
+  loginScreen.style.display='flex';
+  loginScreen.classList.remove('fading-out');
+  document.querySelectorAll('.id-star.star-clicked').forEach(el=>el.classList.remove('star-clicked'));
   document.getElementById('app').classList.remove('active');
   state.user=null;
 }
@@ -1341,8 +1334,8 @@ async function submitShare(evt){
 /* ===================== MEET TONIGHT ===================== */
 /* ===================== TONIGHT'S PLAN ===================== */
 const MEET_OPTIONS = [
-  {k:'call', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.6 4.2 8 7.4 6.2 9c.9 2 2.5 3.6 4.5 4.5l1.6-1.8 3.2 1.4v2.4c0 .9-.8 1.6-1.7 1.5-5.5-.6-9.9-5-10.5-10.5-.1-.9.6-1.7 1.5-1.7h2.8Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>', label:'Phone call'},
-  {k:'video', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2.5" y="6" width="10" height="8" rx="1.6" stroke="currentColor" stroke-width="1.3"/><path d="M12.5 8.6 17 6.4v7.2l-4.5-2.2" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>', label:'Video call'},
+  {k:'call', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.6 4.2 8 7.4 6.2 9c.9 2 2.5 3.6 4.5 4.5l1.6-1.8 3.2 1.4v2.4c0 .9-.8 1.6-1.7 1.5-5.5-.6-9.9-5-10.5-10.5-.1-.9.6-1.7 1.5-1.7h2.8Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>', label:'Call'},
+  {k:'video', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h9A2.5 2.5 0 0 1 17 5.5v5A2.5 2.5 0 0 1 14.5 13H8l-3.5 3v-3H5.5A2.5 2.5 0 0 1 3 10.5v-5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>', label:'Chat'},
   {k:'meet', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="7.7" cy="10" r="5" stroke="currentColor" stroke-width="1.3"/><circle cx="12.3" cy="10" r="5" stroke="currentColor" stroke-width="1.3"/></svg>', label:'Meet in person'},
   {k:'solo', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.5 3.5a7 7 0 1 0 3 10.9A8.5 8.5 0 0 1 13.5 3.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>', label:'Solo time'}
 ];
@@ -1367,14 +1360,14 @@ function meetSummary(rec){
   if(!a && !b) return '';
   if(a && b){
     if(a===b){
-      const map={call:'Talking on the phone tonight',video:'Video date tonight',meet:'✦ Seeing each other tonight ✦',solo:'Both taking solo time tonight'};
+      const map={call:'Talking on the phone tonight',video:'Chatting tonight',meet:'✦ Seeing each other tonight ✦',solo:'Both taking solo time tonight'};
       return map[a] || '';
     }
     return '↔ Different plans tonight — worth a quick check-in';
   }
   const who = a ? 'Rey' : 'Meng';
   const val = a || b;
-  const map2 = {call:'wants a call tonight', video:'wants a video call tonight', meet:'wants to meet tonight', solo:'needs some solo time tonight'};
+  const map2 = {call:'wants a call tonight', video:'wants to chat tonight', meet:'wants to meet tonight', solo:'needs some solo time tonight'};
   return `${who} ${map2[val]}`;
 }
 function renderMeet(){
