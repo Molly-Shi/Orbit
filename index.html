@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Orbit · Rey &amp; Meng</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -202,9 +202,11 @@ body[data-user="Meng"] .me-chip{color:#0B2B40;}
   transition:opacity .15s ease, transform .15s ease;
 }
 .orbit-tooltip.show{opacity:1; transform:translateY(0);}
+.orbit-tooltip.tappable{pointer-events:auto; cursor:pointer;}
 .orbit-tooltip .ot-tag{font-size:11px; color:rgba(244,239,230,.55); margin-bottom:5px;}
 .orbit-tooltip .ot-author{font-family:'IBM Plex Mono',monospace; font-size:10px; color:rgba(244,239,230,.45); margin-bottom:3px;}
 .orbit-tooltip .ot-text{font-size:12.5px; line-height:1.45;}
+.orbit-tooltip .ot-hint{font-size:10px; color:rgba(143,219,255,.75); margin-top:7px; font-weight:600;}
 .orbit-hint{position:absolute; top:20px; left:26px; color:rgba(244,239,230,.5); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;}
 .orbit-legend{position:absolute; top:20px; right:26px; display:flex; gap:16px; font-size:12px; color:rgba(244,239,230,.7);}
 .orbit-legend span{display:flex; align-items:center; gap:6px;}
@@ -212,14 +214,11 @@ body[data-user="Meng"] .me-chip{color:#0B2B40;}
 .fab{position:absolute; bottom:22px; right:24px; width:54px; height:54px; border-radius:50%; background:var(--accent); color:#fff; font-size:24px; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 30px var(--glow); transition:transform .3s; z-index:5;}
 body[data-user="Meng"] .fab{color:#0B2B40;}
 .fab:hover{transform:scale(1.08) rotate(90deg);}
-.view-toggle{position:absolute; bottom:24px; left:24px; display:flex; gap:6px; background:rgba(244,239,230,.08); padding:4px; border-radius:100px; z-index:5;}
-.view-toggle button{padding:7px 14px; border-radius:100px; font-size:12px; color:rgba(244,239,230,.6);}
-.view-toggle button.active{background:rgba(244,239,230,.92); color:var(--night);}
 .orbit-node{cursor:none;}
 .orbit-node circle.body{transition:r .2s;}
 .orbit-node:hover circle.body{filter:brightness(1.25);}
 
-.row-below{padding:0 44px 60px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px;}
+.row-below{margin:0 44px; padding-bottom:60px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px;}
 @media(max-width:1080px){.row-below{grid-template-columns:1fr 1fr;}}
 @media(max-width:760px){.row-below{grid-template-columns:1fr;}}
 
@@ -593,10 +592,6 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
         </div>
         <svg id="orbit-svg" viewBox="0 0 900 520" preserveAspectRatio="xMidYMid meet"></svg>
         <div class="orbit-tooltip" id="orbit-tooltip"></div>
-        <div class="view-toggle">
-          <button class="active" id="btn-orbit-view" onclick="setOrbitDisplay('orbit')">Orbit</button>
-          <button id="btn-list-view" onclick="setOrbitDisplay('list')">List</button>
-        </div>
         <button class="fab" onclick="openCompose()" title="Share something new">＋</button>
       </div>
       <div class="row-below">
@@ -932,7 +927,6 @@ let state = {
   places:[], placesIndex:[]
 };
 let orbitRotationRey=0, orbitRotationMeng=0.9;
-let orbitMode='orbit';
 let scheduleMode='personal';
 let selectedTag=null;
 let pendingPhoto=null, pendingMemoPhoto=null, pendingPlacePhoto=null;
@@ -1013,7 +1007,7 @@ function logout(){
   state.user=null;
 }
 function renderAll(){
-  renderFeed(); renderOrbit(); if(orbitMode==='list') renderOrbitListOverlay(true);
+  renderFeed(); renderOrbit();
   renderMeet(); renderSchedule(); renderTodos(); renderMemos(); renderMood(); renderPlaces();
 }
 
@@ -1171,7 +1165,19 @@ function drawOrbitFor(user, rx, ry, rotDeg, cx, cy, rotation, color){
     node.setAttribute('class','orbit-node');
     node.setAttribute('transform',`translate(${x},${y})`);
     node.setAttribute('data-share-id', s.id);
-    node.onclick = ()=>openDetail(s.id);
+    node.onclick = (e)=>{
+      if(hoverCapable){ openDetail(s.id); return; }
+      // Touch devices: first tap shows a quick preview (matching desktop
+      // hover), a second tap on the same node opens the full detail.
+      if(mobilePreviewId===s.id){
+        hideOrbitTooltip();
+        mobilePreviewId=null;
+        openDetail(s.id);
+      }else{
+        mobilePreviewId=s.id;
+        showOrbitTooltip(s, e);
+      }
+    };
     const glow = document.createElementNS(NS,'circle');
     glow.setAttribute('r','15'); glow.setAttribute('fill',color); glow.setAttribute('opacity','0.22');
     node.appendChild(glow);
@@ -1193,13 +1199,16 @@ function drawOrbitFor(user, rx, ry, rotDeg, cx, cy, rotation, color){
 // animation frame while rotating — per-node hover listeners would lose
 // their target constantly and flicker.
 const hoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+let mobilePreviewId = null;
 function showOrbitTooltip(s, evt){
   const tip = document.getElementById('orbit-tooltip');
   tip.innerHTML = `
     <div class="ot-tag">${tagIcon(s.tag)} ${esc(s.tag)}</div>
     <div class="ot-author">${s.author} · ${fmtDate(s.createdAt)}</div>
-    <div class="ot-text">${esc(s.text).slice(0,90)}${s.text.length>90?'…':''}</div>`;
+    <div class="ot-text">${esc(s.text).slice(0,90)}${s.text.length>90?'…':''}</div>
+    ${!hoverCapable ? '<div class="ot-hint">Tap again for full details</div>' : ''}`;
   tip.classList.add('show');
+  if(!hoverCapable) tip.classList.add('tappable');
   positionOrbitTooltip(evt);
 }
 function positionOrbitTooltip(evt){
@@ -1228,43 +1237,23 @@ if(hoverCapable){
     hideOrbitTooltip();
   });
   orbitSvgEl.addEventListener('mouseleave', hideOrbitTooltip);
+}else{
+  // Touch: tapping the tooltip itself also opens full details, and tapping
+  // empty orbit background (not a node) dismisses an open preview.
+  document.getElementById('orbit-tooltip').addEventListener('click', ()=>{
+    if(mobilePreviewId){ const id=mobilePreviewId; hideOrbitTooltip(); mobilePreviewId=null; openDetail(id); }
+  });
+  document.getElementById('orbit-svg').addEventListener('click', (e)=>{
+    if(!e.target.closest('.orbit-node')){ hideOrbitTooltip(); mobilePreviewId=null; }
+  });
 }
 function animateOrbits(){
   orbitRotationRey += 0.0016;
   orbitRotationMeng -= 0.0012;
-  if(orbitMode==='orbit' && document.getElementById('view-home')?.classList.contains('active')) renderOrbit();
+  if(document.getElementById('view-home')?.classList.contains('active')) renderOrbit();
   requestAnimationFrame(animateOrbits);
 }
 requestAnimationFrame(animateOrbits);
-
-function setOrbitDisplay(mode){
-  orbitMode = mode;
-  document.getElementById('btn-orbit-view').classList.toggle('active', mode==='orbit');
-  document.getElementById('btn-list-view').classList.toggle('active', mode==='list');
-  const svg = document.getElementById('orbit-svg');
-  if(mode==='list'){ svg.style.display='none'; renderOrbitListOverlay(true); hideOrbitTooltip(); }
-  else{ svg.style.display='block'; renderOrbitListOverlay(false); }
-}
-function renderOrbitListOverlay(show){
-  let el = document.getElementById('orbit-list-overlay');
-  const wrap = document.querySelector('.orbit-wrap');
-  if(!el){
-    el = document.createElement('div');
-    el.id='orbit-list-overlay';
-    el.style.cssText='position:absolute; inset:0; overflow-y:auto; padding:64px 26px 70px; display:flex; flex-direction:column; gap:10px; z-index:1;';
-    wrap.appendChild(el);
-  }
-  el.style.display = show ? 'flex' : 'none';
-  if(!show) return;
-  el.innerHTML = state.shares.length ? state.shares.map(s=>`
-    <div class="feed-item" style="background:rgba(244,239,230,.05); border-radius:14px; cursor:none;" onclick="openDetail('${s.id}')">
-      <div class="feed-tag-ic" style="background:rgba(244,239,230,.1);">${tagIcon(s.tag)}</div>
-      <div>
-        <div class="who mono" style="color:rgba(244,239,230,.5);">${s.author} · ${fmtDate(s.createdAt)} · ${esc(s.tag)}</div>
-        <div class="txt" style="color:var(--star);">${esc(s.text).slice(0,80)}</div>
-      </div>
-    </div>`).join('') : '<div style="color:rgba(244,239,230,.4); font-size:13px; padding:20px;">No shares yet — tap ＋ to start.</div>';
-}
 
 /* ===================== FEED ===================== */
 function renderFeed(){
@@ -1375,7 +1364,7 @@ async function submitShare(evt){
   state.shares.unshift(obj);
   state.sharesIndex.push(obj.id);
   closeModal('compose-modal');
-  renderFeed(); renderOrbit(); if(orbitMode==='list') renderOrbitListOverlay(true);
+  renderFeed(); renderOrbit();
   await sMultiSet({
     ['share:'+obj.id]: JSON.stringify(obj),
     'shares-index': JSON.stringify(state.sharesIndex)
@@ -1830,7 +1819,7 @@ async function deleteShareRecord(id){
   state.shares = state.shares.filter(x=>x.id!==id);
   state.sharesIndex = state.sharesIndex.filter(x=>x!==id);
   closeModal('detail-modal');
-  renderFeed(); renderOrbit(); if(orbitMode==='list') renderOrbitListOverlay(true);
+  renderFeed(); renderOrbit();
   await sMultiSet({ ['share:'+id]: null, 'shares-index': JSON.stringify(state.sharesIndex) });
   toast('Share deleted');
 }
@@ -1909,6 +1898,11 @@ function drawCursorTrail(){
   ctx.arc(mouseX,mouseY,5,0,Math.PI*2);
   ctx.fillStyle = cursorHex;
   ctx.fill();
+  // Thin white edge so the dot stays visible against similarly-colored
+  // UI (e.g. the blue "+" button), where a plain color dot could blend in.
+  ctx.lineWidth = 1.4;
+  ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+  ctx.stroke();
   requestAnimationFrame(drawCursorTrail);
 }
 requestAnimationFrame(drawCursorTrail);
