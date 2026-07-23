@@ -898,7 +898,8 @@ if(!FIREBASE_CONFIGURED){
 /* ===================== CONFIG ===================== */
 const TAGS = [
   {k:'Reading', ic:'📖'}, {k:'Food', ic:'🍜'}, {k:'Inspiration', ic:'💡'},
-  {k:'Mood', ic:'💗'}, {k:'Travel', ic:'✈️'}, {k:'Film', ic:'🎬'}, {k:'Music', ic:'🎵'}, {k:'Work', ic:'💼'}
+  {k:'Mood', ic:'💗'}, {k:'Travel', ic:'✈️'}, {k:'Film', ic:'🎬'}, {k:'Music', ic:'🎵'}, {k:'Work', ic:'💼'},
+  {k:'Leisure', ic:'🛋️'}, {k:'Gaming', ic:'🎮'}
 ];
 const TAG_ICON = Object.fromEntries(TAGS.map(t=>[t.k,t.ic]));
 function tagIcon(t){ return TAG_ICON[t] || '🔖'; }
@@ -1116,6 +1117,7 @@ function switchView(name){
 
 /* ===================== ORBIT VISUALIZATION ===================== */
 const NS='http://www.w3.org/2000/svg';
+let orbitNodeRefs = { Rey: [], Meng: [] };
 function renderOrbit(){
   const svg = document.getElementById('orbit-svg');
   svg.innerHTML='';
@@ -1138,11 +1140,16 @@ function renderOrbit(){
   sunLabel.textContent='♥'; sunLabel.setAttribute('fill','#1E1930');
   svg.appendChild(sunLabel);
 
-  drawOrbitFor('Rey', 250, 130, -14, cx, cy, orbitRotationRey, COLOR_REY);
-  drawOrbitFor('Meng', 320, 165, 11, cx, cy, orbitRotationMeng, COLOR_MENG);
+  orbitNodeRefs.Rey = buildOrbitFor('Rey', 250, 130, -14, cx, cy, COLOR_REY, svg);
+  orbitNodeRefs.Meng = buildOrbitFor('Meng', 320, 165, 11, cx, cy, COLOR_MENG, svg);
+  updateOrbitPositions();
 }
-function drawOrbitFor(user, rx, ry, rotDeg, cx, cy, rotation, color){
-  const svg = document.getElementById('orbit-svg');
+// Builds the static ring + one persistent node per share, once. Nodes are
+// NOT recreated on every animation frame — only their transform is updated
+// (see updateOrbitPositions) — so a node being tapped never gets swapped
+// out from under a touch gesture mid-tap, which was silently dropping taps
+// on mobile.
+function buildOrbitFor(user, rx, ry, rotDeg, cx, cy, color, svg){
   const rad = rotDeg*Math.PI/180;
   const g = document.createElementNS(NS,'g');
   g.setAttribute('transform', `translate(${cx},${cy}) rotate(${rotDeg})`);
@@ -1155,15 +1162,12 @@ function drawOrbitFor(user, rx, ry, rotDeg, cx, cy, rotation, color){
 
   const items = state.shares.filter(s=>s.author===user);
   const n = items.length;
-  if(n===0) return;
+  const refs = [];
+  if(n===0) return refs;
   items.forEach((s,i)=>{
-    const angle = rotation + i*(2*Math.PI/n);
-    const lx = rx*Math.cos(angle), ly = ry*Math.sin(angle);
-    const x = cx + lx*Math.cos(rad) - ly*Math.sin(rad);
-    const y = cy + lx*Math.sin(rad) + ly*Math.cos(rad);
+    const baseAngle = i*(2*Math.PI/n);
     const node = document.createElementNS(NS,'g');
     node.setAttribute('class','orbit-node');
-    node.setAttribute('transform',`translate(${x},${y})`);
     node.setAttribute('data-share-id', s.id);
     node.onclick = (e)=>{
       if(hoverCapable){ openDetail(s.id); return; }
@@ -1191,6 +1195,22 @@ function drawOrbitFor(user, rx, ry, rotDeg, cx, cy, rotation, color){
     txt.textContent = tagIcon(s.tag);
     node.appendChild(txt);
     svg.appendChild(node);
+    refs.push({node, rx, ry, rad, baseAngle});
+  });
+  return refs;
+}
+function updateOrbitPositions(){
+  const cx=450, cy=270;
+  updateGroupPositions(orbitNodeRefs.Rey, cx, cy, orbitRotationRey);
+  updateGroupPositions(orbitNodeRefs.Meng, cx, cy, orbitRotationMeng);
+}
+function updateGroupPositions(refs, cx, cy, rotation){
+  refs.forEach(r=>{
+    const angle = rotation + r.baseAngle;
+    const lx = r.rx*Math.cos(angle), ly = r.ry*Math.sin(angle);
+    const x = cx + lx*Math.cos(r.rad) - ly*Math.sin(r.rad);
+    const y = cy + lx*Math.sin(r.rad) + ly*Math.cos(r.rad);
+    r.node.setAttribute('transform', `translate(${x},${y})`);
   });
 }
 // Desktop only: hover a node on the orbit to see a quick preview without
@@ -1250,7 +1270,7 @@ if(hoverCapable){
 function animateOrbits(){
   orbitRotationRey += 0.0016;
   orbitRotationMeng -= 0.0012;
-  if(document.getElementById('view-home')?.classList.contains('active')) renderOrbit();
+  if(document.getElementById('view-home')?.classList.contains('active')) updateOrbitPositions();
   requestAnimationFrame(animateOrbits);
 }
 requestAnimationFrame(animateOrbits);
