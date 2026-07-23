@@ -1,5 +1,7 @@
 # Orbit
 
+**v1.0.0 — Stable Release**
+
 *Every memory finds its orbit.*
 
 **Reduce communication overhead · Stay synchronized · Continuous awareness · Shared life journey**
