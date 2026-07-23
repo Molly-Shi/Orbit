@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Orbit">
+<meta name="theme-color" content="#1E1930">
 <title>Orbit · Rey &amp; Meng</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -32,7 +37,7 @@
 body[data-user="Rey"]{ --accent:#3B5998; --accent-2:#7C97C9; --glow:rgba(59,89,152,.42); }
 body[data-user="Meng"]{ --accent:#6FB8DE; --accent-2:#BFE3F2; --glow:rgba(111,184,222,.4); }
 *{box-sizing:border-box; margin:0; padding:0;}
-html,body{height:100%;}
+html,body{height:100%; height:100dvh;}
 body{
   font-family:'Manrope',sans-serif;
   background:var(--bg);
@@ -83,7 +88,7 @@ input,textarea,select{font-family:inherit; cursor:none;}
   100%{transform:translate(8vmax,10vmax) scale(1.12);}
 }
 .login-logo{
-  position:absolute; top:26px; left:30px; z-index:3;
+  position:absolute; top:calc(26px + env(safe-area-inset-top)); left:calc(30px + env(safe-area-inset-left)); z-index:3;
   display:flex; align-items:center; gap:10px;
   color:rgba(244,239,230,.75);
 }
@@ -153,7 +158,7 @@ input,textarea,select{font-family:inherit; cursor:none;}
 .identity-name{font-family:'Fraunces',serif; font-size:22px; font-weight:500; margin-bottom:2px;}
 
 /* ================= APP SHELL ================= */
-#app{display:none; height:100vh; width:100vw; overflow:hidden;}
+#app{display:none; height:100vh; height:100dvh; width:100vw; overflow:hidden;}
 #app.active{display:flex;}
 .sidebar{
   width:88px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--line);
@@ -172,11 +177,11 @@ body[data-user="Meng"] .me-chip{color:#0B2B40;}
 .logout-link{font-size:10px; color:var(--ink-softer); padding:0;}
 .logout-link:hover{color:var(--ink-soft);}
 
-.main{flex:1; position:relative; overflow:hidden; height:100vh;}
+.main{flex:1; position:relative; overflow:hidden; height:100vh; height:100dvh;}
 .view{position:absolute; inset:0; overflow-y:auto; opacity:0; pointer-events:none; transform:translateY(10px); transition:opacity .35s ease, transform .35s ease; -webkit-overflow-scrolling:touch;}
 .view.active{opacity:1; pointer-events:auto; transform:translateY(0);}
 
-.topbar{display:flex; align-items:center; justify-content:space-between; padding:32px 44px 16px; gap:12px; flex-wrap:wrap;}
+.topbar{display:flex; align-items:center; justify-content:space-between; padding:calc(32px + env(safe-area-inset-top)) 44px 16px; gap:12px; flex-wrap:wrap;}
 .topbar h1{font-family:'Fraunces',serif; font-size:29px; font-weight:500;}
 .topbar-right{display:flex; align-items:center; gap:14px;}
 .date{font-size:12px; color:var(--ink-softer);}
@@ -441,7 +446,7 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
   .sidebar-bottom{margin-top:0; flex-direction:row; gap:10px;}
   .logout-link{display:none;}
   .main{height:calc(100vh - 66px);}
-  .topbar{padding:22px 20px 12px;}
+  .topbar{padding:calc(22px + env(safe-area-inset-top)) 20px 12px;}
   .topbar h1{font-size:24px;}
   .orbit-wrap{height:46vh; min-height:330px;}
   .orbit-wrap, .row-below, .mode-switch, .personal-grid, .shared-todo, .memo-grid, .places-toolbar, .places-grid{margin-left:20px; margin-right:20px;}
@@ -1243,7 +1248,9 @@ function positionOrbitTooltip(evt){
   tip.style.top = Math.max(8,y) + 'px';
 }
 function hideOrbitTooltip(){
-  document.getElementById('orbit-tooltip').classList.remove('show');
+  const tip = document.getElementById('orbit-tooltip');
+  tip.classList.remove('show');
+  tip.classList.remove('tappable');
 }
 if(hoverCapable){
   const orbitSvgEl = document.getElementById('orbit-svg');
