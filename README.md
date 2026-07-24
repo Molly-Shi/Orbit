@@ -1,6 +1,6 @@
 # Orbit
 
-**v1.0.0 — Stable Release**
+**v1.1.0**
 
 *Every memory finds its orbit.*
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Orbit v1.0.0 — Stable Release (2026-07-23) — see CHANGELOG.md -->
+<!-- Orbit v1.1.0 (2026-07-23) — see CHANGELOG.md -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -41,7 +41,7 @@ body[data-user="Meng"]{ --accent:#6FB8DE; --accent-2:#BFE3F2; --glow:rgba(111,18
 html,body{height:100%; height:100dvh;}
 body{
   font-family:'Manrope',sans-serif;
-  background:var(--bg);
+  background:var(--night);
   color:var(--ink);
   overflow-x:hidden;
   cursor:none;
@@ -89,7 +89,7 @@ input,textarea,select{font-family:inherit; cursor:none;}
   100%{transform:translate(8vmax,10vmax) scale(1.12);}
 }
 .login-logo{
-  position:absolute; top:calc(26px + env(safe-area-inset-top)); left:calc(30px + env(safe-area-inset-left)); z-index:3;
+  position:absolute; top:calc(44px + env(safe-area-inset-top)); left:calc(30px + env(safe-area-inset-left)); z-index:3;
   display:flex; align-items:center; gap:10px;
   color:rgba(244,239,230,.75);
 }
@@ -104,7 +104,26 @@ input,textarea,select{font-family:inherit; cursor:none;}
 .login-title{font-size:clamp(30px,6.5vw,54px); font-weight:500; line-height:1.16; margin-bottom:14px;}
 .login-title .lt-line{display:block;}
 .login-title em{font-style:italic; background:linear-gradient(90deg,#BFE3F2,#7C97C9); -webkit-background-clip:text; background-clip:text; color:transparent;}
-.login-sub{color:rgba(244,239,230,.55); font-size:14px; margin-bottom:48px;}
+.login-sub{color:rgba(244,239,230,.55); font-size:14px; margin-bottom:36px;}
+.passcode-row{display:flex; justify-content:center;}
+.passcode-inputs{display:flex; gap:14px; justify-content:center; margin-top:6px;}
+.pc-digit{
+  width:52px; height:60px; text-align:center; font-size:24px; font-family:'IBM Plex Mono',monospace;
+  color:var(--star); background:rgba(255,255,255,.05); border:1px solid rgba(244,239,230,.18);
+  border-radius:14px; outline:none; caret-color:#6FB8DE; transition:border-color .2s, transform .12s;
+}
+.pc-digit:focus{border-color:#6FB8DE; background:rgba(255,255,255,.08);}
+.passcode-inputs.shake{animation:pcShake .4s;}
+@keyframes pcShake{
+  0%,100%{transform:translateX(0);}
+  20%{transform:translateX(-8px);} 40%{transform:translateX(8px);}
+  60%{transform:translateX(-6px);} 80%{transform:translateX(6px);}
+}
+.passcode-error{
+  text-align:center; font-size:12.5px; color:#E39A9A; margin-top:14px;
+  opacity:0; transition:opacity .2s;
+}
+.passcode-error.show{opacity:1;}
 
 /* click-to-enter transition: a quick pulse on the star, then a smooth
    crossfade from the login screen into the app — no full-screen flare. */
@@ -118,17 +137,9 @@ input,textarea,select{font-family:inherit; cursor:none;}
 }
 @keyframes appFadeIn{ from{opacity:0; transform:scale(.985);} to{opacity:1; transform:scale(1);} }
 #app.active{animation:appFadeIn .45s ease;}
-.identity-row{display:flex; gap:22px; justify-content:center; flex-wrap:wrap;}
-.identity-card{
-  width:172px; padding:30px 18px 24px; border-radius:24px;
-  border:1px solid rgba(244,239,230,.14); background:rgba(255,255,255,.03);
-  backdrop-filter:blur(6px); transition:transform .45s cubic-bezier(.2,.8,.2,1), border-color .3s;
-}
-.identity-card:hover{transform:translateY(-8px); border-color:rgba(244,239,230,.3);}
 .id-star{
   position:relative; width:64px; height:64px; margin:0 auto 14px;
   animation:starFloat 5.5s ease-in-out infinite;
-  cursor:pointer;
   transition:transform .25s cubic-bezier(.3,.7,.3,1);
 }
 .id-star:hover{transform:scale(1.06);}
@@ -157,10 +168,9 @@ input,textarea,select{font-family:inherit; cursor:none;}
   to{ transform:rotate(360deg) translateX(38px) rotate(-360deg) scaleY(2.4); }
 }
 @keyframes dotTwinkle{0%,100%{opacity:.3;} 50%{opacity:1;}}
-.identity-name{font-family:'Fraunces',serif; font-size:22px; font-weight:500; margin-bottom:2px;}
 
 /* ================= APP SHELL ================= */
-#app{display:none; height:100vh; height:100dvh; width:100vw; overflow:hidden;}
+#app{display:none; height:100vh; height:100dvh; width:100vw; overflow:hidden; background:var(--bg);}
 #app.active{display:flex;}
 .sidebar{
   width:88px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--line);
@@ -242,12 +252,11 @@ body[data-user="Meng"] .fab{color:#0B2B40;}
 .dark-card h3{color:var(--star);}
 .dark-card .eyebrow{font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:rgba(244,239,230,.5); margin-bottom:8px;}
 
-.meet-status{display:flex; gap:12px; margin-top:16px;}
-.meet-person{flex:1; border-radius:16px; padding:14px; text-align:center; border:1px solid rgba(244,239,230,.14); background:rgba(244,239,230,.04);}
-.meet-person .pname{font-size:11px; color:rgba(244,239,230,.6); margin-bottom:8px;}
-.meet-person .pdot{width:26px; height:26px; border-radius:50%; margin:0 auto; background:rgba(244,239,230,.14); transition:all .3s; display:flex; align-items:center; justify-content:center; font-size:13px;}
-.meet-person .pdot svg{width:14px; height:14px; color:var(--star);}
-.meet-person.confirmed .pdot{background:rgba(143,219,255,.22); box-shadow:0 0 14px rgba(143,219,255,.35);}
+.meet-status-solo{display:flex; align-items:center; gap:12px; margin-top:16px; padding:14px; border-radius:16px; border:1px solid rgba(244,239,230,.14); background:rgba(244,239,230,.04);}
+.meet-status-solo .pdot{width:30px; height:30px; border-radius:50%; background:rgba(244,239,230,.14); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; transition:all .3s;}
+.meet-status-solo .pdot svg{width:15px; height:15px; color:var(--star);}
+.meet-status-solo .pdot.confirmed{background:rgba(143,219,255,.22); box-shadow:0 0 14px rgba(143,219,255,.35);}
+.meet-status-text{font-size:13px; color:rgba(244,239,230,.75);}
 .dark-card .tag-pick button{background:rgba(244,239,230,.08); border-color:rgba(244,239,230,.16); color:rgba(244,239,230,.75); font-size:12px; padding:7px 12px; display:inline-flex; align-items:center; gap:6px;}
 .dark-card .tag-pick button.sel{background:var(--accent-2); color:#0B2B40; border-color:var(--accent-2);}
 .dark-card .tag-pick button .opt-ic{display:flex; width:14px; height:14px;}
@@ -357,8 +366,7 @@ body[data-user="Meng"] .submit-btn{color:#0B2B40;}
 .mode-switch{display:flex; gap:8px; margin:0 44px 24px; background:var(--surface-2); padding:5px; border-radius:100px; width:fit-content;}
 .mode-switch button{padding:9px 20px; border-radius:100px; font-size:13px; font-weight:600; color:var(--ink-soft);}
 .mode-switch button.active{background:var(--surface); color:var(--ink); box-shadow:var(--shadow-soft);}
-.personal-grid{margin:0 44px 60px; display:grid; grid-template-columns:1fr 1fr; gap:22px;}
-@media(max-width:760px){.personal-grid{grid-template-columns:1fr;}}
+.personal-grid{margin:0 44px 60px; display:grid; grid-template-columns:1fr; max-width:480px; gap:22px;}
 .person-col{background:var(--surface); border-radius:var(--radius); padding:24px; border:1px solid var(--line); box-shadow:var(--shadow-soft);}
 .person-col-head{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
 .person-col-head .dot{width:12px; height:12px; border-radius:50%;}
@@ -456,10 +464,8 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
   .row-below{grid-template-columns:1fr;}
 }
 @media(max-width:480px){
-  .login-logo{top:20px; left:22px;}
+  .login-logo{top:calc(20px + env(safe-area-inset-top)); left:22px;}
   .login-title{font-size:28px;}
-  .identity-row{gap:14px;}
-  .identity-card{width:148px; padding:24px 12px 18px;}
   .modal-box{padding:22px; border-radius:20px;}
 }
 </style>
@@ -485,84 +491,56 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
       <circle cx="14" cy="14" r="2.6" fill="url(#logoCoreGrad)"/>
     </svg>
     <span class="login-logo-word serif">Orbit</span>
-    <span class="login-version">v1.0.0</span>
+    <span class="login-version">v1.1.0</span>
   </div>
   <div class="login-card">
     <div class="login-title serif">
       <span class="lt-line">Every memory</span>
       <span class="lt-line">finds its <em>orbit.</em></span>
     </div>
-    <div class="login-sub">Tap a star to sign in.</div>
-    <div class="identity-row">
-      <div class="identity-card" data-id="Rey">
-        <div class="id-star" onclick="handleStarClick('Rey')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleStarClick('Rey');}" role="button" tabindex="0" aria-label="Sign in as Rey">
-          <div class="star-orbit-field">
-            <span class="orbit-dot" style="--sz:3px; --delay:0s; --dur:7s; --tw:0s;"></span>
-            <span class="orbit-dot" style="--sz:2px; --delay:-1.2s; --dur:8s; --tw:.3s;"></span>
-            <span class="orbit-dot" style="--sz:3px; --delay:-2.4s; --dur:6.5s; --tw:.6s;"></span>
-            <span class="orbit-dot" style="--sz:2px; --delay:-3.6s; --dur:7.5s; --tw:.9s;"></span>
-            <span class="orbit-dot" style="--sz:4px; --delay:-4.8s; --dur:9s; --tw:1.2s;"></span>
-            <span class="orbit-dot" style="--sz:2px; --delay:-0.6s; --dur:6s; --tw:1.5s;"></span>
-            <span class="orbit-dot" style="--sz:3px; --delay:-1.8s; --dur:8.5s; --tw:1.8s;"></span>
-            <span class="orbit-dot" style="--sz:2px; --delay:-3s; --dur:7s; --tw:2.1s;"></span>
-            <span class="orbit-dot" style="--sz:3px; --delay:-4.2s; --dur:6.8s; --tw:.2s;"></span>
-            <span class="orbit-dot" style="--sz:2px; --delay:-5.4s; --dur:7.8s; --tw:.5s;"></span>
-            <span class="orbit-dot" style="--sz:4px; --delay:-2s; --dur:9.4s; --tw:.8s;"></span>
-            <span class="orbit-dot" style="--sz:2px; --delay:-5s; --dur:6.3s; --tw:1.1s;"></span>
-          </div>
-          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <radialGradient id="reyGlow" cx="50%" cy="50%">
-                <stop offset="0%" stop-color="#7C97C9" stop-opacity=".85"/>
-                <stop offset="100%" stop-color="#7C97C9" stop-opacity="0"/>
-              </radialGradient>
-              <linearGradient id="reyStarFill" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#C3D1EE"/>
-                <stop offset="100%" stop-color="#3B5998"/>
-              </linearGradient>
-            </defs>
-            <circle class="star-glow" cx="32" cy="32" r="30" fill="url(#reyGlow)"/>
-            <path class="star-core" d="M32,5 L38.2,23.5 L57.7,23.7 L42,35.2 L47.9,53.8 L32,42.5 L16.1,53.8 L22,35.2 L6.3,23.7 L25.8,23.5 Z" fill="url(#reyStarFill)"/>
-            <circle cx="32" cy="32" r="3" fill="#fff" opacity=".9"/>
-          </svg>
+    <div class="login-sub" id="login-sub-text">Enter your passcode.</div>
+    <div class="passcode-row" id="login-pass-star">
+      <div class="id-star" style="margin:0 auto 22px;">
+        <div class="star-orbit-field">
+          <span class="orbit-dot" style="--sz:3px; --delay:0s; --dur:7.2s; --tw:.1s;"></span>
+          <span class="orbit-dot" style="--sz:2px; --delay:-1.4s; --dur:8.2s; --tw:.4s;"></span>
+          <span class="orbit-dot" style="--sz:3px; --delay:-2.6s; --dur:6.7s; --tw:.7s;"></span>
+          <span class="orbit-dot" style="--sz:2px; --delay:-3.8s; --dur:7.7s; --tw:1s;"></span>
+          <span class="orbit-dot" style="--sz:4px; --delay:-5s; --dur:9.2s; --tw:1.3s;"></span>
+          <span class="orbit-dot" style="--sz:2px; --delay:-0.8s; --dur:6.2s; --tw:1.6s;"></span>
+          <span class="orbit-dot" style="--sz:3px; --delay:-2s; --dur:8.7s; --tw:1.9s;"></span>
+          <span class="orbit-dot" style="--sz:2px; --delay:-3.2s; --dur:7.2s; --tw:2.2s;"></span>
+          <span class="orbit-dot" style="--sz:3px; --delay:-4.4s; --dur:7s; --tw:.3s;"></span>
+          <span class="orbit-dot" style="--sz:2px; --delay:-5.6s; --dur:8s; --tw:.6s;"></span>
+          <span class="orbit-dot" style="--sz:4px; --delay:-2.2s; --dur:9.6s; --tw:.9s;"></span>
+          <span class="orbit-dot" style="--sz:2px; --delay:-5.2s; --dur:6.5s; --tw:1.2s;"></span>
         </div>
-        <div class="identity-name serif">Rey</div>
-      </div>
-      <div class="identity-card" data-id="Meng">
-        <div class="id-star" onclick="handleStarClick('Meng')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleStarClick('Meng');}" role="button" tabindex="0" aria-label="Sign in as Meng">
-          <div class="star-orbit-field">
-            <span class="orbit-dot" style="--sz:3px; --delay:0s; --dur:7.2s; --tw:.1s;"></span>
-            <span class="orbit-dot" style="--sz:2px; --delay:-1.4s; --dur:8.2s; --tw:.4s;"></span>
-            <span class="orbit-dot" style="--sz:3px; --delay:-2.6s; --dur:6.7s; --tw:.7s;"></span>
-            <span class="orbit-dot" style="--sz:2px; --delay:-3.8s; --dur:7.7s; --tw:1s;"></span>
-            <span class="orbit-dot" style="--sz:4px; --delay:-5s; --dur:9.2s; --tw:1.3s;"></span>
-            <span class="orbit-dot" style="--sz:2px; --delay:-0.8s; --dur:6.2s; --tw:1.6s;"></span>
-            <span class="orbit-dot" style="--sz:3px; --delay:-2s; --dur:8.7s; --tw:1.9s;"></span>
-            <span class="orbit-dot" style="--sz:2px; --delay:-3.2s; --dur:7.2s; --tw:2.2s;"></span>
-            <span class="orbit-dot" style="--sz:3px; --delay:-4.4s; --dur:7s; --tw:.3s;"></span>
-            <span class="orbit-dot" style="--sz:2px; --delay:-5.6s; --dur:8s; --tw:.6s;"></span>
-            <span class="orbit-dot" style="--sz:4px; --delay:-2.2s; --dur:9.6s; --tw:.9s;"></span>
-            <span class="orbit-dot" style="--sz:2px; --delay:-5.2s; --dur:6.5s; --tw:1.2s;"></span>
-          </div>
-          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <radialGradient id="mengGlow" cx="50%" cy="50%">
-                <stop offset="0%" stop-color="#6FB8DE" stop-opacity=".85"/>
-                <stop offset="100%" stop-color="#6FB8DE" stop-opacity="0"/>
-              </radialGradient>
-              <linearGradient id="mengStarFill" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#EAF7FC"/>
-                <stop offset="100%" stop-color="#6FB8DE"/>
-              </linearGradient>
-            </defs>
-            <circle class="star-glow" cx="32" cy="32" r="30" fill="url(#mengGlow)"/>
-            <path class="star-core" d="M32,5 L38.2,23.5 L57.7,23.7 L42,35.2 L47.9,53.8 L32,42.5 L16.1,53.8 L22,35.2 L6.3,23.7 L25.8,23.5 Z" fill="url(#mengStarFill)"/>
-            <circle cx="32" cy="32" r="3" fill="#fff" opacity=".9"/>
-          </svg>
-        </div>
-        <div class="identity-name serif">Meng</div>
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="mengGlow" cx="50%" cy="50%">
+              <stop offset="0%" stop-color="#6FB8DE" stop-opacity=".85"/>
+              <stop offset="100%" stop-color="#6FB8DE" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="mengStarFill" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#EAF7FC"/>
+              <stop offset="100%" stop-color="#6FB8DE"/>
+            </linearGradient>
+          </defs>
+          <circle class="star-glow" cx="32" cy="32" r="30" fill="url(#mengGlow)"/>
+          <path class="star-core" d="M32,5 L38.2,23.5 L57.7,23.7 L42,35.2 L47.9,53.8 L32,42.5 L16.1,53.8 L22,35.2 L6.3,23.7 L25.8,23.5 Z" fill="url(#mengStarFill)"/>
+          <circle cx="32" cy="32" r="3" fill="#fff" opacity=".9"/>
+        </svg>
       </div>
     </div>
+    <form id="passcode-form" onsubmit="return submitPasscode(event)" autocomplete="off">
+      <div class="passcode-inputs" id="passcode-inputs">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pc-digit" data-idx="0">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pc-digit" data-idx="1">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pc-digit" data-idx="2">
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pc-digit" data-idx="3">
+      </div>
+      <div class="passcode-error" id="passcode-error">Incorrect passcode</div>
+    </form>
   </div>
 </div>
 
@@ -578,7 +556,7 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
     </div>
     <div class="sidebar-bottom">
       <div class="me-chip" id="me-chip">R</div>
-      <button type="button" class="logout-link" onclick="logout()">Switch</button>
+      <button type="button" class="logout-link" onclick="logout()">Lock</button>
     </div>
   </div>
 
@@ -610,18 +588,16 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
         <div class="card dark-card">
           <div class="eyebrow" id="meet-date-label"></div>
           <h3 class="serif">Tonight's Plan</h3>
-          <div class="meet-status">
-            <div class="meet-person" id="meet-Rey"><div class="pname">Rey</div><div class="pdot" id="meet-Rey-ic"></div></div>
-            <div class="meet-person" id="meet-Meng"><div class="pname">Meng</div><div class="pdot" id="meet-Meng-ic"></div></div>
+          <div class="meet-status-solo">
+            <span class="pdot" id="meet-Meng-ic"></span>
+            <span class="meet-status-text" id="meet-status-text">Not set yet</span>
           </div>
           <div class="tag-pick" id="meet-options" style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:8px;"></div>
-          <div class="meet-both" id="meet-both-msg"></div>
         </div>
         <div class="card dark-card">
           <div class="eyebrow">Daily check-in</div>
           <h3 class="serif">Today's Mood</h3>
           <div class="mood-scores">
-            <div class="mood-box"><div class="pname">Rey</div><div class="pscore pending" id="mood-Rey">—</div></div>
             <div class="mood-box"><div class="pname">Meng</div><div class="pscore pending" id="mood-Meng">—</div></div>
           </div>
           <button class="dark-btn" id="mood-btn" onclick="openRating()">Rate today</button>
@@ -637,15 +613,10 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
         <div class="date" id="today-label-2"></div>
       </div>
       <div class="mode-switch">
-        <button class="active" id="btn-mode-personal" onclick="setScheduleMode('personal')">Personal Schedule</button>
+        <button class="active" id="btn-mode-personal" onclick="setScheduleMode('personal')">My Schedule</button>
         <button id="btn-mode-shared" onclick="setScheduleMode('shared')">Shared Schedule</button>
       </div>
       <div class="personal-grid" id="personal-schedule-block">
-        <div class="person-col">
-          <div class="person-col-head" data-p="Rey"><span class="dot"></span><h4 class="serif">Rey's Time</h4></div>
-          <div id="sched-list-Rey"></div>
-          <div class="add-inline" onclick="openScheduleAdd('Rey')">＋ Add plan</div>
-        </div>
         <div class="person-col">
           <div class="person-col-head" data-p="Meng"><span class="dot"></span><h4 class="serif">Meng's Time</h4></div>
           <div id="sched-list-Meng"></div>
@@ -967,19 +938,50 @@ function toast(msg){
 }
 function anyModalOpen(){ return !!document.querySelector('.modal-overlay.show'); }
 
-/* ===================== LOGIN ===================== */
+/* ===================== LOGIN (single passcode gate) ===================== */
+const APP_PASSCODE = '9901';
 let starTransitioning = false;
-function handleStarClick(user){
-  if(starTransitioning) return;
+function setupPasscodeInputs(){
+  const inputs = Array.from(document.querySelectorAll('.pc-digit'));
+  inputs.forEach((inp, i)=>{
+    inp.addEventListener('input', ()=>{
+      inp.value = inp.value.replace(/[^0-9]/g,'').slice(0,1);
+      hidePasscodeError();
+      if(inp.value && i < inputs.length-1){ inputs[i+1].focus(); }
+      if(inputs.every(x=>x.value.length===1)){ submitPasscode(); }
+    });
+    inp.addEventListener('keydown', (e)=>{
+      if(e.key==='Backspace' && !inp.value && i>0){ inputs[i-1].focus(); }
+    });
+  });
+}
+function hidePasscodeError(){
+  document.getElementById('passcode-error').classList.remove('show');
+}
+function submitPasscode(evt){
+  if(evt) evt.preventDefault();
+  const inputs = Array.from(document.querySelectorAll('.pc-digit'));
+  const code = inputs.map(i=>i.value).join('');
+  if(code.length<4) return false;
+  if(code !== APP_PASSCODE){
+    document.getElementById('passcode-error').classList.add('show');
+    const row = document.getElementById('passcode-inputs');
+    row.classList.remove('shake'); void row.offsetWidth; row.classList.add('shake');
+    inputs.forEach(i=>i.value='');
+    inputs[0].focus();
+    return false;
+  }
+  if(starTransitioning) return false;
   starTransitioning = true;
-  const starEl = document.querySelector(`.identity-card[data-id="${user}"] .id-star`);
-  starEl.classList.add('star-clicked');
+  const starEl = document.querySelector('#login-pass-star .id-star');
+  if(starEl) starEl.classList.add('star-clicked');
   const loginScreen = document.getElementById('login-screen');
   loginScreen.classList.add('fading-out');
   setTimeout(()=>{
-    login(user);
+    login('Meng');
     starTransitioning = false;
   }, 340);
+  return false;
 }
 function login(user){
   if(!FIREBASE_CONFIGURED){ toast('This page isn\'t connected to a database yet — see the setup notice'); document.getElementById('login-screen').classList.remove('fading-out'); return; }
@@ -1012,9 +1014,12 @@ function logout(){
   loginScreen.style.display='flex';
   loginScreen.classList.remove('fading-out');
   document.querySelectorAll('.id-star.star-clicked').forEach(el=>el.classList.remove('star-clicked'));
+  document.querySelectorAll('.pc-digit').forEach(i=>i.value='');
+  hidePasscodeError();
   document.getElementById('app').classList.remove('active');
   state.user=null;
 }
+setupPasscodeInputs();
 function renderAll(){
   renderFeed(); renderOrbit();
   renderMeet(); renderSchedule(); renderTodos(); renderMemos(); renderMood(); renderPlaces();
@@ -1406,10 +1411,10 @@ async function submitShare(evt){
 /* ===================== MEET TONIGHT ===================== */
 /* ===================== TONIGHT'S PLAN ===================== */
 const MEET_OPTIONS = [
-  {k:'call', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.6 4.2 8 7.4 6.2 9c.9 2 2.5 3.6 4.5 4.5l1.6-1.8 3.2 1.4v2.4c0 .9-.8 1.6-1.7 1.5-5.5-.6-9.9-5-10.5-10.5-.1-.9.6-1.7 1.5-1.7h2.8Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>', label:'Call'},
-  {k:'video', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h9A2.5 2.5 0 0 1 17 5.5v5A2.5 2.5 0 0 1 14.5 13H8l-3.5 3v-3H5.5A2.5 2.5 0 0 1 3 10.5v-5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>', label:'Chat'},
-  {k:'meet', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="7.7" cy="10" r="5" stroke="currentColor" stroke-width="1.3"/><circle cx="12.3" cy="10" r="5" stroke="currentColor" stroke-width="1.3"/></svg>', label:'Meet in person'},
-  {k:'solo', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.5 3.5a7 7 0 1 0 3 10.9A8.5 8.5 0 0 1 13.5 3.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>', label:'Solo time'}
+  {k:'work', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="7" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M7.5 7V5.5A1.5 1.5 0 0 1 9 4h2a1.5 1.5 0 0 1 1.5 1.5V7" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>', label:'Work'},
+  {k:'exercise', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 10h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><rect x="2.5" y="7.5" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="14.5" y="7.5" width="3" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>', label:'Exercise'},
+  {k:'rest', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.5 3.5a7 7 0 1 0 3 10.9A8.5 8.5 0 0 1 13.5 3.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>', label:'Rest'},
+  {k:'social', ic:'<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="7.7" cy="10" r="5" stroke="currentColor" stroke-width="1.3"/><circle cx="12.3" cy="10" r="5" stroke="currentColor" stroke-width="1.3"/></svg>', label:'Socialize'}
 ];
 const MEET_ICON = Object.fromEntries(MEET_OPTIONS.map(o=>[o.k,o.ic]));
 function buildMeetOptions(){
@@ -1427,33 +1432,16 @@ function migrateMeetRecord(rec){
   });
   return out;
 }
-function meetSummary(rec){
-  const a=rec.Rey, b=rec.Meng;
-  if(!a && !b) return '';
-  if(a && b){
-    if(a===b){
-      const map={call:'Talking on the phone tonight',video:'Chatting tonight',meet:'✦ Seeing each other tonight ✦',solo:'Both taking solo time tonight'};
-      return map[a] || '';
-    }
-    return '↔ Different plans tonight — worth a quick check-in';
-  }
-  const who = a ? 'Rey' : 'Meng';
-  const val = a || b;
-  const map2 = {call:'wants a call tonight', video:'wants to chat tonight', meet:'wants to meet tonight', solo:'needs some solo time tonight'};
-  return `${who} ${map2[val]}`;
-}
+const MEET_LABEL = Object.fromEntries(MEET_OPTIONS.map(o=>[o.k,o.label]));
 function renderMeet(){
   const dateKey = todayStr();
   const rec = migrateMeetRecord(state.meetNights[dateKey]);
-  ['Rey','Meng'].forEach(u=>{
-    document.getElementById('meet-'+u).classList.toggle('confirmed', !!rec[u]);
-    document.getElementById('meet-'+u+'-ic').innerHTML = rec[u] ? MEET_ICON[rec[u]] : '';
-  });
-  document.querySelectorAll('#meet-options button').forEach(b=>b.classList.toggle('sel', b.dataset.opt===rec[state.user]));
-  const msg = meetSummary(rec);
-  const msgEl = document.getElementById('meet-both-msg');
-  msgEl.textContent = msg;
-  msgEl.classList.toggle('show', !!msg);
+  const mine = rec[state.user];
+  const dot = document.getElementById('meet-Meng-ic');
+  dot.classList.toggle('confirmed', !!mine);
+  dot.innerHTML = mine ? MEET_ICON[mine] : '';
+  document.getElementById('meet-status-text').textContent = mine ? MEET_LABEL[mine] : 'Not set yet';
+  document.querySelectorAll('#meet-options button').forEach(b=>b.classList.toggle('sel', b.dataset.opt===mine));
 }
 async function pickMeetOption(key){
   const dateKey = todayStr();
@@ -1519,15 +1507,12 @@ async function submitRating(){
 }
 function renderMood(){
   const rec = state.dailyRatings[todayStr()] || {};
-  ['Rey','Meng'].forEach(u=>{
-    const el = document.getElementById('mood-'+u);
-    const avg = ratingAverage(rec[u]);
-    if(avg!==null){ el.textContent = (Math.round(avg*10)/10).toString(); el.classList.remove('pending'); }
-    else { el.textContent='—'; el.classList.add('pending'); }
-  });
+  const el = document.getElementById('mood-Meng');
+  const avg = ratingAverage(rec.Meng);
+  if(avg!==null){ el.textContent = (Math.round(avg*10)/10).toString(); el.classList.remove('pending'); }
+  else { el.textContent='—'; el.classList.add('pending'); }
   const btn = document.getElementById('mood-btn');
-  const mine = ratingAverage(rec[state.user]);
-  btn.textContent = (mine!==null) ? 'Update rating' : 'Rate today';
+  btn.textContent = (avg!==null) ? 'Update rating' : 'Rate today';
 }
 // Every day's rating is stored under its own date key (state.dailyRatings[date]),
 // so nothing ever gets overwritten by a later entry — this view just surfaces
@@ -1567,7 +1552,7 @@ function renderMoodHistoryList(){
   const dates = Object.keys(state.dailyRatings)
     .filter(d=>{
       const rec = state.dailyRatings[d];
-      return rec && (ratingAverage(rec.Rey)!==null || ratingAverage(rec.Meng)!==null);
+      return rec && ratingAverage(rec.Meng)!==null;
     })
     .sort((a,b)=>b.localeCompare(a));
   if(!dates.length){
@@ -1579,7 +1564,6 @@ function renderMoodHistoryList(){
     return `<div class="hist-row">
       <div class="hist-date mono">${fmtHistDate(d)}</div>
       <div class="hist-people">
-        ${renderHistPerson('Rey', rec.Rey)}
         ${renderHistPerson('Meng', rec.Meng)}
       </div>
     </div>`;
@@ -1606,16 +1590,14 @@ function setScheduleMode(mode){
   document.getElementById('shared-todo-block').style.display = mode==='shared' ? 'block' : 'none';
 }
 function renderSchedule(){
-  ['Rey','Meng'].forEach(u=>{
-    const list = (u==='Rey' ? state.scheduleRey : state.scheduleMeng).slice().sort((a,b)=>(a.date+ (a.time||'')).localeCompare(b.date+(b.time||'')));
-    const el = document.getElementById('sched-list-'+u);
-    el.innerHTML = list.length ? list.map(it=>`
-      <div class="sched-item">
-        <div class="sched-time mono">${it.time||'--:--'}</div>
-        <div><div class="sched-text">${esc(it.text)}</div><div class="sched-date">${it.date}</div></div>
-        ${ u===state.user ? `<span class="sched-del" onclick="deleteSchedule('${u}','${it.id}')">✕</span>` : ''}
-      </div>`).join('') : '<div class="empty-note">No plans yet</div>';
-  });
+  const list = state.scheduleMeng.slice().sort((a,b)=>(a.date+ (a.time||'')).localeCompare(b.date+(b.time||'')));
+  const el = document.getElementById('sched-list-Meng');
+  el.innerHTML = list.length ? list.map(it=>`
+    <div class="sched-item">
+      <div class="sched-time mono">${it.time||'--:--'}</div>
+      <div><div class="sched-text">${esc(it.text)}</div><div class="sched-date">${it.date}</div></div>
+      <span class="sched-del" onclick="deleteSchedule('Meng','${it.id}')">✕</span>
+    </div>`).join('') : '<div class="empty-note">No plans yet</div>';
 }
 let scheduleTargetUser=null;
 function openScheduleAdd(user){
