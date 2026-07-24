@@ -2,6 +2,18 @@
 
 All notable changes to Orbit.
 
+## v1.2.0 (2026-07-24)
+
+Full transition to a single-person app.
+
+- Removed every remaining trace of Rey from the interface: page title, the orbit's top-right legend, and all "together"/two-person wording (Schedule, Places, Memos subtitles).
+- Permanently deleted Rey's data from the database: shares, comments, memories, places, personal schedule, Tonight's Plan entries, and daily-rating entries. This runs automatically (and safely repeatedly) on login via a new `purgeReyData()` routine.
+- Removed "Shared Schedule" entirely (the mode switch and the shared to-do list) — Schedule is now a single personal list.
+- Redesigned the Orbit visualization for one person: instead of two rings split by identity, it's now two rings split by recency (recent shares inner, older outer), plus a faint decorative third ring and a scattering of background stars for visual richness.
+- Tonight's Plan options changed again from the placeholder Work/Exercise/Rest/Socialize set — same general idea, kept adjustable.
+- Fixed a leftover duplicate `setScheduleMode()` function (from the v1.1.0 edit) that referenced already-removed DOM elements — dead code, but cleaned up.
+- General dead-CSS cleanup: removed unused selectors left behind by the identity picker, shared schedule, and orbit legend removals.
+
 ## v1.1.0 (2026-07-23)
 
 Major change: the app is now gated by a single 4-digit passcode instead of a two-identity login.

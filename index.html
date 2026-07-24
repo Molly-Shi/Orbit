@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Orbit v1.1.0 (2026-07-23) — see CHANGELOG.md -->
+<!-- Orbit v1.2.0 (2026-07-24) — see CHANGELOG.md -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Orbit">
 <meta name="theme-color" content="#1E1930">
-<title>Orbit · Rey &amp; Meng</title>
+<title>Orbit</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="firebase-app-compat.js"></script>
@@ -35,7 +35,6 @@
   --shadow-soft:0 8px 30px rgba(51,44,37,0.08);
   --shadow-deep:0 20px 60px rgba(20,15,35,0.35);
 }
-body[data-user="Rey"]{ --accent:#3B5998; --accent-2:#7C97C9; --glow:rgba(59,89,152,.42); }
 body[data-user="Meng"]{ --accent:#6FB8DE; --accent-2:#BFE3F2; --glow:rgba(111,184,222,.4); }
 *{box-sizing:border-box; margin:0; padding:0;}
 html,body{height:100%; height:100dvh;}
@@ -225,9 +224,6 @@ body[data-user="Meng"] .me-chip{color:#0B2B40;}
 .orbit-tooltip .ot-text{font-size:12.5px; line-height:1.45;}
 .orbit-tooltip .ot-hint{font-size:10px; color:rgba(143,219,255,.75); margin-top:7px; font-weight:600;}
 .orbit-hint{position:absolute; top:20px; left:26px; color:rgba(244,239,230,.5); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;}
-.orbit-legend{position:absolute; top:20px; right:26px; display:flex; gap:16px; font-size:12px; color:rgba(244,239,230,.7);}
-.orbit-legend span{display:flex; align-items:center; gap:6px;}
-.leg-dot{width:8px; height:8px; border-radius:50%;}
 .fab{position:absolute; bottom:22px; right:24px; width:54px; height:54px; border-radius:50%; background:var(--accent); color:#fff; font-size:24px; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 30px var(--glow); transition:transform .3s; z-index:5;}
 body[data-user="Meng"] .fab{color:#0B2B40;}
 .fab:hover{transform:scale(1.08) rotate(90deg);}
@@ -363,16 +359,8 @@ body[data-user="Meng"] .submit-btn{color:#0B2B40;}
 }
 
 /* ================= SCHEDULE ================= */
-.mode-switch{display:flex; gap:8px; margin:0 44px 24px; background:var(--surface-2); padding:5px; border-radius:100px; width:fit-content;}
-.mode-switch button{padding:9px 20px; border-radius:100px; font-size:13px; font-weight:600; color:var(--ink-soft);}
-.mode-switch button.active{background:var(--surface); color:var(--ink); box-shadow:var(--shadow-soft);}
 .personal-grid{margin:0 44px 60px; display:grid; grid-template-columns:1fr; max-width:480px; gap:22px;}
 .person-col{background:var(--surface); border-radius:var(--radius); padding:24px; border:1px solid var(--line); box-shadow:var(--shadow-soft);}
-.person-col-head{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
-.person-col-head .dot{width:12px; height:12px; border-radius:50%;}
-.person-col-head[data-p="Rey"] .dot{background:#3B5998;}
-.person-col-head[data-p="Meng"] .dot{background:#6FB8DE;}
-.person-col-head h4{font-family:'Fraunces',serif; font-weight:500; font-size:16px;}
 .sched-item{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); align-items:center;}
 .sched-item:last-child{border-bottom:none;}
 .sched-time{font-size:12px; color:var(--ink-softer); width:56px; flex-shrink:0; font-family:'IBM Plex Mono',monospace;}
@@ -383,19 +371,6 @@ body[data-user="Meng"] .submit-btn{color:#0B2B40;}
 .add-inline{margin-top:14px; display:flex; gap:8px; align-items:center; font-size:12px; color:var(--ink-softer);}
 .add-inline:hover{color:var(--accent);}
 .empty-note{font-size:12.5px; color:var(--ink-softer); padding:8px 0;}
-.shared-todo{margin:0 44px 60px; max-width:640px;}
-.todo-add-row{display:flex; gap:10px; margin-bottom:20px;}
-.todo-add-row input{flex:1;}
-.todo-add-row button{padding:0 22px; border-radius:12px; background:var(--accent); color:#fff; font-weight:600; font-size:13px;}
-body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
-.todo-item{display:flex; align-items:center; gap:12px; padding:13px 16px; background:var(--surface); border-radius:14px; margin-bottom:8px; border:1px solid var(--line);}
-.todo-check{width:20px; height:20px; border-radius:6px; border:1.5px solid var(--ink-softer); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; transition:all .2s;}
-.todo-check.done{background:var(--accent); border-color:var(--accent); color:#fff;}
-.todo-item .ttext{flex:1; font-size:14px;}
-.todo-item.done .ttext{text-decoration:line-through; color:var(--ink-softer);}
-.todo-item .tby{font-size:10.5px; color:var(--ink-softer);}
-.todo-del{color:var(--ink-softer); opacity:0; transition:opacity .2s;}
-.todo-item:hover .todo-del{opacity:1;}
 
 /* ================= MEMOS ================= */
 .memo-grid{margin:0 44px 60px; display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:18px;}
@@ -441,7 +416,7 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
 
 /* ================= RESPONSIVE: TABLET / PHONE ================= */
 @media(max-width:1080px){
-  .topbar, .orbit-wrap, .row-below, .mode-switch, .personal-grid, .shared-todo, .memo-grid, .places-toolbar, .places-grid{margin-left:28px; margin-right:28px;}
+  .topbar, .orbit-wrap, .row-below, .personal-grid, .memo-grid, .places-toolbar, .places-grid{margin-left:28px; margin-right:28px;}
   .topbar{padding-left:28px; padding-right:28px;}
 }
 @media(max-width:760px){
@@ -459,7 +434,7 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
   .topbar{padding:calc(22px + env(safe-area-inset-top)) 20px 12px;}
   .topbar h1{font-size:24px;}
   .orbit-wrap{height:46vh; min-height:330px;}
-  .orbit-wrap, .row-below, .mode-switch, .personal-grid, .shared-todo, .memo-grid, .places-toolbar, .places-grid{margin-left:20px; margin-right:20px;}
+  .orbit-wrap, .row-below, .personal-grid, .memo-grid, .places-toolbar, .places-grid{margin-left:20px; margin-right:20px;}
   .topbar{padding-left:20px; padding-right:20px;}
   .row-below{grid-template-columns:1fr;}
 }
@@ -491,7 +466,7 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
       <circle cx="14" cy="14" r="2.6" fill="url(#logoCoreGrad)"/>
     </svg>
     <span class="login-logo-word serif">Orbit</span>
-    <span class="login-version">v1.1.0</span>
+    <span class="login-version">v1.2.0</span>
   </div>
   <div class="login-card">
     <div class="login-title serif">
@@ -571,11 +546,7 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
         </div>
       </div>
       <div class="orbit-wrap">
-        <div class="orbit-hint">Interleaved orbits</div>
-        <div class="orbit-legend">
-          <span><i class="leg-dot" style="background:#3B5998"></i>Rey</span>
-          <span><i class="leg-dot" style="background:#6FB8DE"></i>Meng</span>
-        </div>
+        <div class="orbit-hint">Your orbit</div>
         <svg id="orbit-svg" viewBox="0 0 900 520" preserveAspectRatio="xMidYMid meet"></svg>
         <div class="orbit-tooltip" id="orbit-tooltip"></div>
         <button class="fab" onclick="openCompose()" title="Share something new">＋</button>
@@ -612,23 +583,11 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
         <h1 class="serif">Schedule</h1>
         <div class="date" id="today-label-2"></div>
       </div>
-      <div class="mode-switch">
-        <button class="active" id="btn-mode-personal" onclick="setScheduleMode('personal')">My Schedule</button>
-        <button id="btn-mode-shared" onclick="setScheduleMode('shared')">Shared Schedule</button>
-      </div>
       <div class="personal-grid" id="personal-schedule-block">
         <div class="person-col">
-          <div class="person-col-head" data-p="Meng"><span class="dot"></span><h4 class="serif">Meng's Time</h4></div>
           <div id="sched-list-Meng"></div>
           <div class="add-inline" onclick="openScheduleAdd('Meng')">＋ Add plan</div>
         </div>
-      </div>
-      <div class="shared-todo" id="shared-todo-block" style="display:none;">
-        <div class="todo-add-row">
-          <input type="text" id="todo-input" class="field-input" placeholder="Add something to do together…">
-          <button onclick="addTodo()">Add</button>
-        </div>
-        <div id="todo-list"></div>
       </div>
     </div>
 
@@ -636,7 +595,7 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
     <div class="view" id="view-places">
       <div class="topbar">
         <h1 class="serif">Places</h1>
-        <div class="date">Everywhere you've been, together</div>
+        <div class="date">Everywhere you've been</div>
       </div>
       <div class="places-toolbar">
         <button class="fab" style="position:static; width:44px; height:44px; font-size:20px;" onclick="openPlaceAdd()" title="Mark a place">＋</button>
@@ -648,7 +607,7 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
     <div class="view" id="view-memos">
       <div class="topbar">
         <h1 class="serif">Memos</h1>
-        <div class="date">Only the two of you know</div>
+        <div class="date">Only you know</div>
       </div>
       <div class="memo-grid" id="memo-grid"></div>
     </div>
@@ -830,8 +789,9 @@ body[data-user="Meng"] .todo-add-row button{color:#0B2B40;}
    3. Project settings (gear icon) → General → scroll to "Your apps" →
       add a Web app → copy the config object it gives you → paste the
       values below, replacing every "YOUR_..." placeholder.
-   4. Save this file and re-deploy (e.g. push to GitHub Pages). Both Rey
-      and Meng open the SAME deployed URL — that's what makes them share data.
+   4. Save this file and re-deploy (e.g. push to GitHub Pages). Open the
+      SAME deployed URL each time — that's what keeps your data connected
+      to the same database.
 ================================================================= */
 const firebaseConfig = {
   apiKey: "AIzaSyABhGgnd4MRTm681ZwS9235afq-yO0MVTs",
@@ -863,7 +823,7 @@ if(!FIREBASE_CONFIGURED){
       <div class="login-eyebrow">Setup needed</div>
       <div class="login-title serif">Almost there.</div>
       <div class="setup-body">
-        This page needs to be connected to a Firebase project before Rey and Meng can sync.
+        This page needs to be connected to a Firebase project before it can sync and save.
         <ol>
           <li>Create a free project at <code>console.firebase.google.com</code> and turn on Realtime Database.</li>
           <li>In Project settings → General → Your apps, add a Web app and copy its config.</li>
@@ -906,8 +866,7 @@ let state = {
   dailyRatings:{},
   places:[], placesIndex:[]
 };
-let orbitRotationRey=0, orbitRotationMeng=0.9;
-let scheduleMode='personal';
+let orbitRotationInner=0, orbitRotationOuter=0.9;
 let selectedTag=null;
 let pendingPhoto=null, pendingMemoPhoto=null, pendingPlacePhoto=null;
 let hasPromptedRatingThisSession=false;
@@ -1000,7 +959,8 @@ function login(user){
   buildMeetOptions();
   buildRatingScale();
   buildPlaceTagPicker();
-  loadAll().then(()=>{
+  loadAll().then(async ()=>{
+    await purgeReyData();
     renderAll();
     maybePromptRating();
     startRealtimeSync();
@@ -1022,7 +982,7 @@ function logout(){
 setupPasscodeInputs();
 function renderAll(){
   renderFeed(); renderOrbit();
-  renderMeet(); renderSchedule(); renderTodos(); renderMemos(); renderMood(); renderPlaces();
+  renderMeet(); renderSchedule(); renderMemos(); renderMood(); renderPlaces();
 }
 
 /* ===================== LOAD DATA ===================== */
@@ -1082,6 +1042,76 @@ async function loadAll(){
     toast('Could not load data — check your connection');
   }
 }
+// One-time (and safely repeatable) cleanup: strips every trace of Rey from
+// shares, comments, memories, places, schedule, tonight's-plan, and daily
+// ratings, both locally and in the database. Once everything is clean this
+// is a no-op on future logins, so it's fine to run on every login.
+async function purgeReyData(){
+  const updates = {};
+  let changed = false;
+
+  const reyShareIds = state.shares.filter(s=>s.author==='Rey').map(s=>s.id);
+  if(reyShareIds.length){
+    state.shares = state.shares.filter(s=>s.author!=='Rey');
+    state.sharesIndex = state.sharesIndex.filter(id=>!reyShareIds.includes(id));
+    reyShareIds.forEach(id=>{ updates['share:'+id] = null; });
+    updates['shares-index'] = JSON.stringify(state.sharesIndex);
+    changed = true;
+  }
+  state.shares.forEach(s=>{
+    if(s.comments && s.comments.some(c=>c.author==='Rey')){
+      s.comments = s.comments.filter(c=>c.author!=='Rey');
+      updates['share:'+s.id] = JSON.stringify(s);
+      changed = true;
+    }
+  });
+
+  const reyMemoryIds = state.memories.filter(m=>m.author==='Rey').map(m=>m.id);
+  if(reyMemoryIds.length){
+    state.memories = state.memories.filter(m=>m.author!=='Rey');
+    state.memoriesIndex = state.memoriesIndex.filter(id=>!reyMemoryIds.includes(id));
+    reyMemoryIds.forEach(id=>{ updates['memory:'+id] = null; });
+    updates['memories-index'] = JSON.stringify(state.memoriesIndex);
+    changed = true;
+  }
+
+  const reyPlaceIds = state.places.filter(p=>p.author==='Rey').map(p=>p.id);
+  if(reyPlaceIds.length){
+    state.places = state.places.filter(p=>p.author!=='Rey');
+    state.placesIndex = state.placesIndex.filter(id=>!reyPlaceIds.includes(id));
+    reyPlaceIds.forEach(id=>{ updates['place:'+id] = null; });
+    updates['places-index'] = JSON.stringify(state.placesIndex);
+    changed = true;
+  }
+
+  if(state.scheduleRey && state.scheduleRey.length){
+    state.scheduleRey = [];
+    updates['schedule:Rey'] = null;
+    changed = true;
+  }
+
+  let meetChanged = false;
+  Object.keys(state.meetNights).forEach(d=>{
+    if(state.meetNights[d] && Object.prototype.hasOwnProperty.call(state.meetNights[d],'Rey')){
+      delete state.meetNights[d].Rey;
+      meetChanged = true;
+    }
+  });
+  if(meetChanged){ updates['meet-nights'] = JSON.stringify(state.meetNights); changed = true; }
+
+  let moodChanged = false;
+  Object.keys(state.dailyRatings).forEach(d=>{
+    if(state.dailyRatings[d] && Object.prototype.hasOwnProperty.call(state.dailyRatings[d],'Rey')){
+      delete state.dailyRatings[d].Rey;
+      moodChanged = true;
+    }
+  });
+  if(moodChanged){ updates['daily-ratings'] = JSON.stringify(state.dailyRatings); changed = true; }
+
+  if(changed){
+    await sMultiSet(updates);
+  }
+}
 
 /* ===================== REAL-TIME SYNC (Firebase) ===================== */
 let fbRootListener = null;
@@ -1130,7 +1160,7 @@ function switchView(name){
 
 /* ===================== ORBIT VISUALIZATION ===================== */
 const NS='http://www.w3.org/2000/svg';
-let orbitNodeRefs = { Rey: [], Meng: [] };
+let orbitNodeRefs = { inner: [], outer: [] };
 function renderOrbit(){
   const svg = document.getElementById('orbit-svg');
   svg.innerHTML='';
@@ -1143,6 +1173,30 @@ function renderOrbit(){
       <stop offset="100%" stop-color="#3B5998"/>
     </radialGradient>`;
   svg.appendChild(defs);
+
+  // Faint static background stars for atmosphere — fixed positions so they
+  // don't jitter on re-render, purely decorative.
+  const bgStars = [
+    [70,60,1.2],[830,90,1],[120,460,1],[790,440,1.3],[450,60,0.9],[60,270,1],
+    [850,270,1],[250,470,1],[620,470,1],[40,150,0.8],[870,380,0.8],[500,480,1],
+    [180,50,0.9],[720,60,1],[380,490,0.8]
+  ];
+  bgStars.forEach(([x,y,r])=>{
+    const s = document.createElementNS(NS,'circle');
+    s.setAttribute('cx',x); s.setAttribute('cy',y); s.setAttribute('r',r);
+    s.setAttribute('fill','#fff'); s.setAttribute('opacity','0.35');
+    svg.appendChild(s);
+  });
+
+  // A faint, empty decorative ring for visual depth — no data on it.
+  const decoRing = document.createElementNS(NS,'ellipse');
+  decoRing.setAttribute('cx',cx); decoRing.setAttribute('cy',cy);
+  decoRing.setAttribute('rx',380); decoRing.setAttribute('ry',195);
+  decoRing.setAttribute('fill','none'); decoRing.setAttribute('stroke','#6FB8DE');
+  decoRing.setAttribute('stroke-opacity','0.1'); decoRing.setAttribute('stroke-width','1');
+  decoRing.setAttribute('transform',`rotate(-6 ${cx} ${cy})`);
+  svg.appendChild(decoRing);
+
   const sun = document.createElementNS(NS,'circle');
   sun.setAttribute('cx',cx); sun.setAttribute('cy',cy); sun.setAttribute('r',22);
   sun.setAttribute('fill','url(#sunGrad)');
@@ -1153,8 +1207,12 @@ function renderOrbit(){
   sunLabel.textContent='♥'; sunLabel.setAttribute('fill','#1E1930');
   svg.appendChild(sunLabel);
 
-  orbitNodeRefs.Rey = buildOrbitFor('Rey', 250, 130, -14, cx, cy, COLOR_REY, svg);
-  orbitNodeRefs.Meng = buildOrbitFor('Meng', 320, 165, 11, cx, cy, COLOR_MENG, svg);
+  // Two rings split by recency — inner ring for more recent shares, outer
+  // for older ones — so the visual stays rich even with a single author.
+  const sorted = state.shares.slice().sort((a,b)=>b.createdAt-a.createdAt);
+  const mid = Math.ceil(sorted.length/2);
+  orbitNodeRefs.inner = buildOrbitFor(sorted.slice(0,mid), 220, 108, -14, cx, cy, COLOR_MENG, svg);
+  orbitNodeRefs.outer = buildOrbitFor(sorted.slice(mid), 340, 172, 11, cx, cy, '#3B5998', svg);
   updateOrbitPositions();
 }
 // Builds the static ring + one persistent node per share, once. Nodes are
@@ -1162,7 +1220,7 @@ function renderOrbit(){
 // (see updateOrbitPositions) — so a node being tapped never gets swapped
 // out from under a touch gesture mid-tap, which was silently dropping taps
 // on mobile.
-function buildOrbitFor(user, rx, ry, rotDeg, cx, cy, color, svg){
+function buildOrbitFor(items, rx, ry, rotDeg, cx, cy, color, svg){
   const rad = rotDeg*Math.PI/180;
   const g = document.createElementNS(NS,'g');
   g.setAttribute('transform', `translate(${cx},${cy}) rotate(${rotDeg})`);
@@ -1173,7 +1231,6 @@ function buildOrbitFor(user, rx, ry, rotDeg, cx, cy, color, svg){
   ring.setAttribute('stroke-opacity','0.28'); ring.setAttribute('stroke-width','1.2');
   g.appendChild(ring); svg.appendChild(g);
 
-  const items = state.shares.filter(s=>s.author===user);
   const n = items.length;
   const refs = [];
   if(n===0) return refs;
@@ -1214,8 +1271,8 @@ function buildOrbitFor(user, rx, ry, rotDeg, cx, cy, color, svg){
 }
 function updateOrbitPositions(){
   const cx=450, cy=270;
-  updateGroupPositions(orbitNodeRefs.Rey, cx, cy, orbitRotationRey);
-  updateGroupPositions(orbitNodeRefs.Meng, cx, cy, orbitRotationMeng);
+  updateGroupPositions(orbitNodeRefs.inner, cx, cy, orbitRotationInner);
+  updateGroupPositions(orbitNodeRefs.outer, cx, cy, orbitRotationOuter);
 }
 function updateGroupPositions(refs, cx, cy, rotation){
   refs.forEach(r=>{
@@ -1237,7 +1294,7 @@ function showOrbitTooltip(s, evt){
   const tip = document.getElementById('orbit-tooltip');
   tip.innerHTML = `
     <div class="ot-tag">${tagIcon(s.tag)} ${esc(s.tag)}</div>
-    <div class="ot-author">${s.author} · ${fmtDate(s.createdAt)}</div>
+    <div class="ot-author">${fmtDate(s.createdAt)}</div>
     <div class="ot-text">${esc(s.text).slice(0,90)}${s.text.length>90?'…':''}</div>
     ${!hoverCapable ? '<div class="ot-hint">Tap again for full details</div>' : ''}`;
   tip.classList.add('show');
@@ -1283,8 +1340,8 @@ if(hoverCapable){
   });
 }
 function animateOrbits(){
-  orbitRotationRey += 0.0016;
-  orbitRotationMeng -= 0.0012;
+  orbitRotationInner += 0.0016;
+  orbitRotationOuter -= 0.0012;
   if(document.getElementById('view-home')?.classList.contains('active')) updateOrbitPositions();
   requestAnimationFrame(animateOrbits);
 }
@@ -1582,13 +1639,6 @@ function maybePromptRating(){
 setInterval(()=>{ if(state.user) maybePromptRating(); }, 60000);
 
 /* ===================== SCHEDULE ===================== */
-function setScheduleMode(mode){
-  scheduleMode=mode;
-  document.getElementById('btn-mode-personal').classList.toggle('active', mode==='personal');
-  document.getElementById('btn-mode-shared').classList.toggle('active', mode==='shared');
-  document.getElementById('personal-schedule-block').style.display = mode==='personal' ? 'grid' : 'none';
-  document.getElementById('shared-todo-block').style.display = mode==='shared' ? 'block' : 'none';
-}
 function renderSchedule(){
   const list = state.scheduleMeng.slice().sort((a,b)=>(a.date+ (a.time||'')).localeCompare(b.date+(b.time||'')));
   const el = document.getElementById('sched-list-Meng');
@@ -1601,7 +1651,6 @@ function renderSchedule(){
 }
 let scheduleTargetUser=null;
 function openScheduleAdd(user){
-  if(user!==state.user){ toast('You can only add your own schedule'); return; }
   scheduleTargetUser=user;
   document.getElementById('sched-date').value=todayStr();
   document.getElementById('sched-time').value='';
@@ -1615,49 +1664,17 @@ async function submitSchedule(evt){
   const text = document.getElementById('sched-text').value.trim();
   if(!date || !text) return false;
   const item = {id:uid(), date, time, text};
-  if(scheduleTargetUser==='Rey') state.scheduleRey.push(item); else state.scheduleMeng.push(item);
+  state.scheduleMeng.push(item);
   closeModal('schedule-modal');
   renderSchedule();
-  await sSet('schedule:'+scheduleTargetUser, JSON.stringify(scheduleTargetUser==='Rey'?state.scheduleRey:state.scheduleMeng));
+  await sSet('schedule:Meng', JSON.stringify(state.scheduleMeng));
   toast('Added to schedule');
   return false;
 }
 async function deleteSchedule(user,id){
-  if(user==='Rey') state.scheduleRey = state.scheduleRey.filter(x=>x.id!==id);
-  else state.scheduleMeng = state.scheduleMeng.filter(x=>x.id!==id);
+  state.scheduleMeng = state.scheduleMeng.filter(x=>x.id!==id);
   renderSchedule();
-  await sSet('schedule:'+user, JSON.stringify(user==='Rey'?state.scheduleRey:state.scheduleMeng));
-}
-
-/* ===================== SHARED TODOS ===================== */
-function renderTodos(){
-  const el = document.getElementById('todo-list');
-  el.innerHTML = state.todos.length ? state.todos.map(t=>`
-    <div class="todo-item ${t.done?'done':''}">
-      <div class="todo-check ${t.done?'done':''}" onclick="toggleTodo('${t.id}')">${t.done?'✓':''}</div>
-      <div class="ttext">${esc(t.text)}</div>
-      <div class="tby mono">${t.addedBy}</div>
-      <div class="todo-del" onclick="deleteTodo('${t.id}')">✕</div>
-    </div>`).join('') : '<div class="empty-note">No shared to-dos yet — add something to do together</div>';
-}
-async function addTodo(){
-  const input = document.getElementById('todo-input');
-  const text = input.value.trim();
-  if(!text) return;
-  state.todos.unshift({id:uid(), text, done:false, addedBy:state.user, createdAt:Date.now()});
-  input.value='';
-  renderTodos();
-  await sSet('todos', JSON.stringify(state.todos));
-}
-async function toggleTodo(id){
-  const t = state.todos.find(x=>x.id===id); if(!t) return;
-  t.done=!t.done; renderTodos();
-  await sSet('todos', JSON.stringify(state.todos));
-}
-async function deleteTodo(id){
-  state.todos = state.todos.filter(x=>x.id!==id);
-  renderTodos();
-  await sSet('todos', JSON.stringify(state.todos));
+  await sSet('schedule:Meng', JSON.stringify(state.scheduleMeng));
 }
 
 /* ===================== PLACES ===================== */
